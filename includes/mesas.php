@@ -760,6 +760,10 @@ final class Comanda
             'estado' => 'abierta',
         ]);
 
+        // El descuento se olvida: se estaba cobrando sobre un
+        // pedido congelado, y al reabrir se vuelve a empezar.
+        descuento_olvidar($comandaId);
+
         Auditoria::registrar('reabrir_comanda', 'comandas', $comandaId,
             ['estado' => 'por_cobrar'], [
                 'estado' => 'abierta',
@@ -795,33 +799,7 @@ final class Comanda
         }
 
         try {
-            DB::enTransaccion(function () use ($comandaId, $motivo) {
-                // Reponer todo lo consumido.
-                $items = DB::all(
-                    "SELECT * FROM comanda_items
-                     WHERE comanda_id = :comanda AND estado = 'pendiente'",
-                    ['comanda' => $comandaId]
-                );
-
-                foreach ($items as $item) {
-                    // Reponer todo lo que sacó esta línea.
-                    self::reponer_stock_item(
-                        (int) $item['id'],
-                        'Mesa anulada: ' . $motivo
-                    );
-
-                    DB::actualizar('comanda_items', (int) $item['id'], [
-                        'estado'           => 'anulado',
-                        'motivo_anulacion' => mb_substr('Mesa anulada: ' . $motivo, 0, 255),
-                    ]);
-                }
-
-                DB::actualizar('comandas', $comandaId, [
-                    'estado'            => 'anulada',
-                    'usuario_cierre_id' => Auth::id(),
-                    'cerrada_en'        => ahora(),
-                ]);
-            });
+            self::anular_cuerpo($comandaId, $motivo);
         } catch (Throwable $e) {
             error_log('Error anulando mesa: ' . $e->getMessage());
 
@@ -833,6 +811,68 @@ final class Comanda
         ]);
 
         return ['ok' => true, 'mensaje' => ''];
+    }
+
+    /**
+     * Da de baja una comanda y devuelve todo su stock.
+     *
+     * Es el cuerpo que comparten anular() (mesa sin cobrar) y
+     * anular_tras_anular_venta() (el administrador devolvió una
+     * venta). Se separa porque las dos cosas tienen el mismo efecto
+     * sobre el stock y la comanda, y no tiene por qué estar
+     * duplicado.
+     *
+     * @throws Throwable Si algo falla, para que la transacción de
+     *                   arriba se revierta entera.
+     */
+    private static function anular_cuerpo(int $comandaId, string $motivo): void
+    {
+        // Reponer todo lo consumido, línea por línea.
+        $items = DB::all(
+            "SELECT * FROM comanda_items
+             WHERE comanda_id = :comanda AND estado = 'pendiente'",
+            ['comanda' => $comandaId]
+        );
+
+        foreach ($items as $item) {
+            // Reponer todo lo que sacó esta línea: si es un combo,
+            // son varios productos.
+            self::reponer_stock_item(
+                (int) $item['id'],
+                'Mesa anulada: ' . $motivo
+            );
+
+            DB::actualizar('comanda_items', (int) $item['id'], [
+                'estado'           => 'anulado',
+                'motivo_anulacion' => mb_substr('Mesa anulada: ' . $motivo, 0, 255),
+            ]);
+        }
+
+        DB::actualizar('comandas', $comandaId, [
+            'estado'            => 'anulada',
+            'usuario_cierre_id' => Auth::id(),
+            'cerrada_en'        => ahora(),
+        ]);
+
+        // La mesa no se va a cobrar, asi que el descuento pendiente
+        // se olvida.
+        descuento_olvidar($comandaId);
+    }
+
+    /**
+     * Anula la comanda porque su venta fue anulada.
+     *
+     * Lo llama Venta::anular(). El stock vuelve porque los productos
+     * ya salieron del depósito cuando se cargaron al pedido, y la
+     * comanda queda anulada para que no quede un pedido
+     * cobrado dando vueltas por la grilla.
+     *
+     * No pide motivo ni revisa el rol: eso lo hace Venta::anular(),
+     * que es el que sabe por qué se está anulando.
+     */
+    public static function anular_tras_anular_venta(int $comandaId, string $motivo): void
+    {
+        self::anular_cuerpo($comandaId, $motivo);
     }
 
     /**

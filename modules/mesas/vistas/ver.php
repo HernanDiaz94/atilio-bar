@@ -26,6 +26,12 @@ if (!$cerrada) {
     $accionesCabecera .= ' <a href="' . e(url('mesas/mover') . '&comanda_id=' . (int) $comanda['id']) . '" '
         . 'class="btn btn-atilio-amarillo">'
         . '<i class="bi bi-arrow-left-right"></i> Mover</a>';
+} elseif ($estado === 'por_cobrar') {
+    // Pidio la cuenta: lo natural es cobrar. Va primero porque es
+    // lo que hay que hacer ahora.
+    $accionesCabecera = '<a href="' . e(url('cobrar') . '&id=' . (int) $comanda['id']) . '" '
+        . 'class="btn btn-atilio-oscuro">'
+        . '<i class="bi bi-cash-coin"></i> Cobrar</a> ' . $accionesCabecera;
 }
 
 require APP_ROOT . '/includes/header.php';

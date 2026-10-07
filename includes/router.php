@@ -418,6 +418,110 @@ function rutas_app(): array
             'grupo'       => 'gestion',
             'ocultar'     => null,
         ],
+        // ---------- Cobro (Etapa 4) ----------
+        // Cobrar es tarea del vendedor: es lo que hace todo el día.
+        // El descuento NO: ese lo hace el administrador, y el
+        // control real está en Venta::cobrar(), no acá.
+        'cobrar' => [
+            'controlador' => 'cobrar/index.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Cobrar mesa',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        'cobrar/confirmar' => [
+            'controlador' => 'cobrar/confirmar.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Confirmar cobro',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Aplicar (o quitar) el descuento de una mesa mientras se
+        // cobra. El permiso es de vendedor porque el control real
+        // esta en Venta::cobrar() y en el propio controlador: aca
+        // solo se evita que el vendedor llegue a la pantalla.
+        'cobrar/descuento' => [
+            'controlador' => 'cobrar/descuento.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Aplicar descuento',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Anular una venta devuelve plata y stock: solo admin.
+        'cobrar/anular' => [
+            'controlador' => 'cobrar/anular.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Anular venta',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => 'es_admin',
+        ],
+
+        // ---------- Caja (Etapa 4) ----------
+        // La caja la ven los dos: el vendedor necesita saber si
+        // puede cobrar. Abrir y cerrar es del administrador.
+        'caja' => [
+            'controlador' => 'caja/index.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Caja',
+            'icono'       => 'bi-safe-fill',
+            'grupo'       => 'gestion',
+            'ocultar'     => null,
+        ],
+
+        'caja/abrir' => [
+            'controlador' => 'caja/abrir.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Abrir caja',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'caja/cerrar' => [
+            'controlador' => 'caja/cerrar.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Cerrar caja',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        // Entradas y salidas de plata que no son ventas: las puede
+        // hacer cualquiera del turno, no hace falta ser admin.
+        'caja/movimiento' => [
+            'controlador' => 'caja/movimiento.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Movimiento de caja',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => null,
+        ],
+
+        // ---------- Historial de ventas (solo admin) ----------
+        'ventas' => [
+            'controlador' => 'ventas/index.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Ventas',
+            'icono'       => 'bi-receipt-cutoff',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'ventas/ver' => [
+            'controlador' => 'ventas/ver.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Ver venta',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
     ];
 }
 

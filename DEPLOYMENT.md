@@ -311,3 +311,26 @@ Lo que podés hacer con esta etapa:
 anula la línea, vuelve al depósito. Si vendés algo que no tenés, el
 número queda en negativo a propósito, para que al contar el
 depósito se note el faltante.
+
+### Qué trae la Etapa 4
+
+Al importarla aparecen cinco tablas nuevas (`ventas`, `venta_pagos`,
+`cajas`, `caja_movimientos` y `metodos_pago`), los tres medios de
+pago (efectivo, tarjeta y transferencia) y las pantallas de **Cobrar**
+y **Caja**.
+
+**Lo primero que hay que hacer al entrar es abrir la caja.** Sin caja
+no se puede cobrar ninguna mesa: el sistema necesita saber a qué
+turno pertenece la plata que entra.
+
+El cobro es en efectivo, tarjeta o transferencia, y se puede pagar
+partido (una parte en efectivo y otra con tarjeta). Los descuentos
+los aplica solo el administrador.
+
+### Si el sistema dice "falta importar una migración"
+
+Si se suben los archivos PHP pero se olvida importar el `.sql` de
+una etapa, la aplicación no se cae: abre con un cartel que dice
+exactamente qué archivo falta y cómo arreglarlo. El cartel no
+muestra ningún dato del servidor.
+

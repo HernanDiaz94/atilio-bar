@@ -39,10 +39,68 @@ sobre la base que ya tiene datos, sin tocar las tablas anteriores.
 | 1      | (por `install.php`) | Usuarios, sesiones y configuración |
 | 2      | `sql/etapa2.sql`    | Carta de productos y stock         |
 | 3      | `sql/etapa3.sql`    | Mesas, pedidos y reservas          |
+| 4      | `sql/etapa4.sql`    | Cobro, ventas y caja               |
 
 Cada migración es segura de correr más de una vez: los `CREATE TABLE`
 usan `IF NOT EXISTS` y los datos iniciales se insertan solo si no
 existen.
+
+---
+
+## Cobro, ventas y caja (Etapa 4)
+
+Una mesa pide la cuenta, el vendedor la cobra, la mesa se libera.
+
+### Antes de cobrar hay que abrir la caja
+
+No se puede cobrar nada con la caja cerrada. Se abre el turno
+contando cuánta plata hay en el cajón, y con esa cantidad el sistema
+va sumando lo que se cobre. Al cerrar el turno se cuenta otra vez y
+el sistema dice cuánto **debería** haber:
+
+```
+Con lo que había al abrir      $ 15.000,00
+Efectivo cobrado (12 ventas)   $  86.400,00
+Retiros del dueño              - $ 20.000,00
+Gastos del bar                 - $  3.000,00
+                                -----------
+Debería haber                  $ 78.400,00
+```
+
+Si lo que se cuenta no da, el sistema lo dice con todas las letras:
+cuánto sobró o cuánto faltó. El desglose está a propósito: si al
+final faltan $500, ver de dónde sale el número ayuda a saber si fue
+un error de tipeo o un gasto que no se cargó.
+
+### Los pagos se pueden mezclar
+
+Una venta puede cobrarse en efectivo, tarjeta o transferencia, y
+también partido: $5.000 en efectivo y $3.000 con tarjeta es un caso
+normal, no una excepción. Por eso los pagos son filas y no columnas.
+
+Solo el **efectivo** entra al cajón y se cuenta al cerrar. La tarjeta
+y la transferencia se registran para saber cómo se cobró, pero esa
+plata nunca estuvo en el cajón.
+
+### Los descuentos los hace el administrador
+
+El vendedor cobra el total tal cual. No es desconfianza: un
+descuento es plata que sale del bar, y si el sistema deja que
+cualquiera lo haga, un error de tipeo se come la ganancia sin que
+nadie se entere hasta el cierre.
+
+El descuento se aplica **mientras se está cobrando**, no al cargar el
+pedido, y queda anotado en la venta con su motivo y con quién lo
+hizo. Si algún día hace falta que el vendedor también pueda, se
+enciende el interruptor `venta_permitir_descuento_vendedor` de la
+configuración y no hay que tocar código.
+
+### Anular una venta
+
+Solo el administrador, solo con la caja del día abierta, y siempre
+con motivo. Anula devuelve la plata a la caja y el stock al
+depósito, pero **no borra el registro**: queda claro que se cobró y
+se devolvió.
 
 ---
 
@@ -95,6 +153,9 @@ AtilioBar/
 │   ├── helpers.php           Formato de dinero, fechas, validación
 │   ├── stock.php             Servicio de stock (Etapa 2)
 │   ├── mesas.php             Mesas, comandas y reservas (Etapa 3)
+│   ├── ventas.php            Ventas, cobros y caja (Etapa 4)
+│   ├── descuentos.php        Descuento pendiente mientras se cobra
+│   ├── schema.php            Detecta si falta importar una migración
 │   ├── auditoria.php         Registro de acciones
 │   ├── router.php            Mapa de rutas y control de acceso
 │   ├── header.php / footer.php    Layout base
@@ -106,6 +167,9 @@ AtilioBar/
 │   ├── productos/            Carta, categorías (Etapa 2)
 │   ├── stock/                Historial, ajustes y compras (Etapa 2)
 │   ├── mesas/                Grilla, pedidos, reservas (Etapa 3)
+│   ├── cobrar/               Pantalla de cobro (Etapa 4)
+│   ├── caja/                 Turnos y conteo de dinero (Etapa 4)
+│   ├── ventas/               Historial de ventas (Etapa 4)
 │   └── auth/salir.php        Cierre de sesión
 │
 ├── assets/
@@ -116,7 +180,8 @@ AtilioBar/
 ├── sql/
 │   ├── database.sql          Esquema de la Etapa 1
 │   ├── etapa2.sql            Migración de la Etapa 2
-│   └── etapa3.sql            Migración de la Etapa 3
+│   ├── etapa3.sql            Migración de la Etapa 3
+│   └── etapa4.sql            Migración de la Etapa 4
 └── logs/                     Errores de PHP (no se versiona)
 ```
 

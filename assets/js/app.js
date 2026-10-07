@@ -462,9 +462,391 @@
         });
     }
 
+
+    // ========================================================
+    //  Cobro (Etapa 4)
+    // ========================================================
+
+    /**
+     * Formatea un número con el formato argentino: $ 1.234,50
+     *
+     * Se replica acá en vez de usar Intl para no depender de que
+     * el servidor tenga la extensión de=intl cargada.
+     */
+    function moneyJs(numero) {
+        var n = Math.abs(Number(numero) || 0);
+        var signo = Number(numero) < 0 ? '-' : '';
+        var texto = n.toFixed(2);
+        var partes = texto.split('.');
+        var entero = partes[0];
+        var centavos = partes[1];
+
+        return signo + '$ ' + entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+            + ',' + centavos;
+    }
+
+    /**
+     * Interpreta un número escrito a la argentina.
+     *
+     * "1.800" son mil ochocientos y "1,80" es un peso con ochenta
+     * centavos: la diferencia la hace la cantidad de dígitos
+     * después del separador.
+     */
+    function leerNumero(texto) {
+        var limpio = String(texto || '').trim().replace(/\s/g, '');
+
+        if (limpio === '') { return 0; }
+
+        var tieneComa = limpio.indexOf(',') !== -1;
+        var tienePunto = limpio.indexOf('.') !== -1;
+
+        if (tieneComa && tienePunto) {
+            // El último separador es el decimal.
+            if (limpio.lastIndexOf(',') > limpio.lastIndexOf('.')) {
+                limpio = limpio.replace(/\./g, '').replace(',', '.');
+            } else {
+                limpio = limpio.replace(/,/g, '');
+            }
+        } else if (tieneComa) {
+            limpio = limpio.replace(',', '.');
+        } else if (tienePunto) {
+            var partes = limpio.split('.');
+
+            // "1.800" (un solo punto de tres dígitos) = 1800.
+            if (partes.length === 2 && partes[1].length === 3) {
+                limpio = limpio.replace('.', '');
+            }
+        }
+
+        var valor = parseFloat(limpio);
+
+        return isNaN(valor) ? 0 : valor;
+    }
+
+    /**
+     * La pantalla de cobro.
+     *
+     * Tres cosas hace, y las tres son para que el vendedor no
+     * tenga que hacer cuentas con el cliente mirando:
+     *
+     *   - calcula el vuelto mientras escribe lo que recibió;
+     *   - avisa si el pago no cuadra, antes de confirmar;
+     *   - deja agregar medios de pago para pagos partidos.
+     */
+    function conectarCobro() {
+        var datos = window.ATILIO_COBRO;
+
+        if (!datos) { return; }
+
+        var total = parseFloat(datos.total) || 0;
+
+        var inpRecibido = document.getElementById('recibido');
+        var bloqueRecibido = document.getElementById('bloqueRecibido');
+        var cajaVuelto = document.getElementById('vueltoCaja');
+        var textoVuelto = document.getElementById('vueltoTexto');
+        var radios = document.querySelectorAll('input[name="medio_principal"]');
+        var filas = document.getElementById('filasPagos');
+        var alertaSaldo = document.getElementById('alertaSaldo');
+        var agregar = document.getElementById('agregarFila');
+
+        // --- Qué medio está elegido ---------------------------------
+        function medioActual() {
+            for (var i = 0; i < radios.length; i++) {
+                if (radios[i].checked) { return radios[i]; }
+            }
+
+            return radios.length > 0 ? radios[0] : null;
+        }
+
+        // --- Vuelto --------------------------------------------------
+        function pintarVuelto() {
+            if (!inpRecibido || !bloqueRecibido) { return; }
+
+            var medio = medioActual();
+            var esEfectivo = medio && medio.getAttribute('data-efectivo') === '1';
+
+            // El vuelto solo tiene sentido cuando se recibe plata.
+            // Con tarjeta o transferencia no hay billets que devolver.
+            if (!esEfectivo) {
+                bloqueRecibido.hidden = true;
+
+                if (cajaVuelto) { cajaVuelto.hidden = true; }
+
+                return;
+            }
+
+            bloqueRecibido.hidden = false;
+
+            var recibido = leerNumero(inpRecibido.value);
+            var vuelto = recibido - total;
+
+            if (!cajaVuelto || !textoVuelto) { return; }
+
+            if (vuelto > 0) {
+                cajaVuelto.hidden = false;
+                textoVuelto.textContent = moneyJs(vuelto);
+            } else {
+                cajaVuelto.hidden = true;
+            }
+        }
+
+        // --- Aviso de que el pago no cuadra --------------------------
+        function pintarSaldo() {
+            if (!alertaSaldo) { return; }
+
+            var hayPartido = filas && filas.querySelectorAll('.fila-pago').length > 0
+                && filas.closest('details').open;
+
+            if (hayPartido) {
+                var suma = 0;
+                var inputs = filas.querySelectorAll('.pago-importe');
+
+                for (var i = 0; i < inputs.length; i++) {
+                    suma += leerNumero(inputs[i].value);
+                }
+
+                mostrarSaldo(suma, total);
+                return;
+            }
+
+            var medio = medioActual();
+
+            if (medio && medio.getAttribute('data-efectivo') === '1' && inpRecibido) {
+                // En efectivo lo que importa es que se haya recibido
+                // al menos el total.
+                mostrarSaldo(leerNumero(inpRecibido.value), total);
+                return;
+            }
+
+            // Con tarjeta o transferencia el importe es el total: no
+            // hay nada que Saldar.
+            alertaSaldo.hidden = true;
+            alertaSaldo.textContent = '';
+            alertaSaldo.className = 'alerta-saldo';
+        }
+
+        function mostrarSaldo(pagado, esperado) {
+            var diferencia = Math.round((pagado - esperado) * 100) / 100;
+
+            if (Math.abs(diferencia) < 0.005) {
+                alertaSaldo.hidden = false;
+                alertaSaldo.className = 'alerta-saldo alerta-ok';
+                alertaSaldo.textContent = 'Cuadra: ' + moneyJs(esperado) + '.';
+                return;
+            }
+
+            if (diferencia > 0) {
+                alertaSaldo.hidden = false;
+                alertaSaldo.className = 'alerta-saldo alerta-sobra';
+                alertaSaldo.textContent = 'Te pasaste por ' + moneyJs(diferencia) + '.';
+                return;
+            }
+
+            alertaSaldo.hidden = false;
+            alertaSaldo.className = 'alerta-saldo alerta-falta';
+            alertaSaldo.textContent = 'Falta ' + moneyJs(Math.abs(diferencia)) + '.';
+        }
+
+        // --- Botones de billetes -------------------------------------
+        Array.prototype.forEach.call(
+            document.querySelectorAll('.btn-rapido'),
+            function (boton) {
+                boton.addEventListener('click', function () {
+                    if (!inpRecibido) { return; }
+
+                    var valor = boton.getAttribute('data-billete');
+
+                    if (valor === 'exacto') {
+                        inpRecibido.value = total.toFixed(2);
+                    } else {
+                        inpRecibido.value = Number(valor).toFixed(2);
+                    }
+
+                    pintarVuelto();
+                    pintarSaldo();
+                    inpRecibido.focus();
+                });
+            }
+        );
+
+        if (inpRecibido) {
+            inpRecibido.addEventListener('input', function () {
+                pintarVuelto();
+                pintarSaldo();
+            });
+        }
+
+        Array.prototype.forEach.call(
+            document.querySelectorAll('input[name="medio_principal"]'),
+            function (radio) {
+                radio.addEventListener('change', function () {
+                    pintarVuelto();
+                    pintarSaldo();
+                });
+            }
+        );
+
+        // --- Pago partido --------------------------------------------
+        function siguienteIndice() {
+            var inputs = document.querySelectorAll('#filasPagos select');
+            var maximo = -1;
+
+            Array.prototype.forEach.call(inputs, function (select) {
+                var nombre = select.getAttribute('name') || '';
+                var m = nombre.match(/pagos\[(\d+)\]/);
+
+                if (m) {
+                    var n = parseInt(m[1], 10);
+
+                    if (n > maximo) { maximo = n; }
+                }
+            });
+
+            return maximo + 1;
+        }
+
+        if (agregar && filas) {
+            agregar.addEventListener('click', function () {
+                var indice = siguienteIndice();
+                var primera = filas.querySelector('.fila-pago');
+
+                if (!primera) { return; }
+
+                var clon = primera.cloneNode(true);
+
+                // Cada fila necesita sus propios indices.
+                var selects = clon.querySelectorAll('select');
+                var campos = clon.querySelectorAll('input');
+                var quitar = clon.querySelector('.btn-quitar-fila');
+
+                Array.prototype.forEach.call(selects, function (select) {
+                    select.setAttribute('name', 'pagos[' + indice + '][metodo_id]');
+                });
+
+                Array.prototype.forEach.call(campos, function (campo) {
+                    var base = campo.getAttribute('name') || '';
+                    var tipo = base.replace(/\[\d+\]/, '');
+
+                    campo.setAttribute('name', 'pagos[' + indice + '][' + tipo + ']');
+                    campo.value = '';
+                    campo.addEventListener('input', pintarSaldo);
+                });
+
+                if (quitar) {
+                    quitar.addEventListener('click', function () { });
+                }
+
+                // La primera fila que había queda como estaba; la
+                // nueva arranca vacía.
+                var primerCampo = clon.querySelector('.pago-importe');
+
+                if (primerCampo) {
+                    primerCampo.value = '';
+                }
+
+                filas.appendChild(clon);
+                conectarQuitar(clon);
+
+                if (primerCampo) { primerCampo.focus(); }
+
+                pintarSaldo();
+            });
+        }
+
+        function conectarQuitar(fila) {
+            var boton = fila.querySelector('.btn-quitar-fila');
+
+            if (!boton) { return; }
+
+            boton.onclick = function () {
+                // No se puede borrar la última fila: el cobro
+                // necesita al menos un medio de pago.
+                var todas = filas.querySelectorAll('.fila-pago');
+
+                if (todas.length <= 1) {
+                    return;
+                }
+
+                fila.parentNode.removeChild(fila);
+                pintarSaldo();
+            };
+        }
+
+        if (filas) {
+            Array.prototype.forEach.call(
+                filas.querySelectorAll('.fila-pago'),
+                conectarQuitar
+            );
+
+            Array.prototype.forEach.call(
+                filas.querySelectorAll('.pago-importe'),
+                function (campo) {
+                    campo.addEventListener('input', pintarSaldo);
+                }
+            );
+        }
+
+        // Si el pago partido está abierto desde el arranque (porque
+        // el intento anterior falló), hay que pintar el saldo ya.
+        var detalles = document.querySelector('.pago-partido');
+
+        if (detalles) {
+            detalles.addEventListener('toggle', pintarSaldo);
+        }
+
+        pintarVuelto();
+        pintarSaldo();
+    }
+
+    /**
+     * El cierre de caja: compara lo contado contra lo esperado
+     * mientras se escribe, para que la sorpresa aparezca antes de
+     * confirmar y no después.
+     */
+    function conectarCierreCaja() {
+        var datos = window.ATILIO_COBRO;
+
+        if (!datos || datos.esperado === undefined) { return; }
+
+        var campo = document.getElementById('cierre_importe');
+        var alerta = document.getElementById('alertaCierre');
+
+        if (!campo || !alerta) { return; }
+
+        var esperado = parseFloat(datos.esperado) || 0;
+
+        function revisar() {
+            var contado = leerNumero(campo.value);
+            var dif = Math.round((contado - esperado) * 100) / 100;
+
+            if (Math.abs(dif) < 0.005) {
+                alerta.hidden = false;
+                alerta.className = 'alerta-saldo alerta-ok';
+                alerta.textContent = 'Cuadra exacto.';
+                return;
+            }
+
+            if (dif > 0) {
+                alerta.hidden = false;
+                alerta.className = 'alerta-saldo alerta-sobra';
+                alerta.textContent = 'Sobra ' + moneyJs(dif) + '.';
+                return;
+            }
+
+            alerta.hidden = false;
+            alerta.className = 'alerta-saldo alerta-falta';
+            alerta.textContent = 'Falta ' + moneyJs(Math.abs(dif)) + '.';
+        }
+
+        campo.addEventListener('input', revisar);
+        revisar();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         conectarCantidadProductos();
         conectarBuscadorProductos();
+        conectarCobro();
+        conectarCierreCaja();
     });
 
     // ========================================================

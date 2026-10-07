@@ -1406,6 +1406,474 @@ textarea:focus-visible {
 }
 
 /* ================================================================
+   COBRO, VENTAS Y CAJA (Etapa 4)
+   ------------------------------------------------------------
+   La pantalla de cobro se usa con el teléfono en una mano y el
+   cliente esperando. Por eso:
+     - el importe a cobrar es enorme, se lee de reojo;
+     - los medios de pago son botones, no un <select>;
+     - los billetes comunes tienen botón directo.
+   ================================================================ */
+
+/* La tarjeta de la caja tiene fondo más marcado que las otras,
+   para que se sepa de un vistazo que ahí está el dinero. */
+.tarjeta-caja {
+    background-color: var(--verde-claro);
+    border: 3px solid var(--verde-oscuro);
+    border-radius: var(--radio-borde);
+    overflow: hidden;
+}
+
+.tarjeta-caja .tarjeta-cabecera {
+    background-color: var(--verde-oscuro);
+    color: var(--blanco);
+}
+
+.tarjeta-caja .tarjeta-cabecera .small {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* --- El número grande -------------------------------------------
+   Es lo primero que se mira. */
+.monto-a-cobrar,
+.monto-caja strong {
+    display: block;
+    text-align: center;
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--texto);
+    margin: 0.25rem 0 0.75rem;
+}
+
+.monto-caja {
+    padding-bottom: 0.5rem;
+}
+
+.monto-caja span {
+    display: block;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+    margin-bottom: 0.2rem;
+}
+
+.monto-bloqueado {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+/* --- Medios de pago: botones grandes --------------------------- */
+.medios-pago {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.medio-pago {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 78px;
+    padding: 0.5rem;
+    border: 3px solid var(--verde-oscuro);
+    border-radius: var(--radio-borde);
+    background-color: var(--blanco);
+    color: var(--texto);
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+}
+
+.medio-pago input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.medio-pago i {
+    font-size: 1.5rem;
+}
+
+.medio-pago:hover {
+    background-color: var(--verde-claro);
+}
+
+.medio-pago:has(input:checked) {
+    background-color: var(--verde-oscuro);
+    color: var(--blanco);
+}
+
+.medio-pago:has(input:focus-visible) {
+    outline: 3px solid var(--verde-medio);
+    outline-offset: 2px;
+}
+
+/* --- Billetes rápidos ------------------------------------------ */
+.botones-rapidos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    gap: 0.35rem;
+}
+
+.btn-rapido {
+    min-height: 48px;
+    border: 2px solid var(--borde);
+    border-radius: var(--radio-chico);
+    background-color: var(--blanco);
+    color: var(--texto);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-rapido:hover {
+    background-color: var(--amarillo-claro);
+    border-color: var(--verde-oscuro);
+}
+
+/* --- Vuelto ---------------------------------------------------- */
+.vuelto-caja {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--amarillo-claro);
+    border: 2px solid var(--verde-oscuro);
+    border-radius: var(--radio-chico);
+    font-weight: 700;
+}
+
+.vuelto-caja strong {
+    font-size: 1.2rem;
+    color: var(--verde-oscuro);
+}
+
+/* --- Pago partido ---------------------------------------------- */
+.pago-partido {
+    border: 2px dashed var(--borde);
+    border-radius: var(--radio-chico);
+    padding: 0.6rem;
+}
+
+.pago-partido summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--verde-oscuro);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.fila-pago {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.4rem;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.btn-quitar-fila {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #A33A3A;
+    border-radius: 50%;
+    background-color: var(--blanco);
+    color: #8A1B1B;
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.btn-quitar-fila:hover {
+    background-color: #F3D9D9;
+}
+
+@media (max-width: 575.98px) {
+    .monto-a-cobrar,
+    .monto-caja strong {
+        font-size: 2.1rem;
+    }
+
+    .fila-pago {
+        grid-template-columns: 1fr auto;
+    }
+
+    .fila-pago .input-group {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Aviso de que el pago no cuadra */
+.alerta-saldo {
+    margin-top: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radio-chico);
+    font-weight: 700;
+    border: 2px solid transparent;
+}
+
+.alerta-saldo.alerta-falta {
+    background-color: #FFF5F5;
+    border-color: #A33A3A;
+    color: #8A1B1B;
+}
+
+.alerta-saldo.alerta-sobra {
+    background-color: #FFF9E6;
+    border-color: #B08A00;
+    color: #7A5F00;
+}
+
+.alerta-saldo.alerta-ok {
+    background-color: var(--verde-claro);
+    border-color: var(--verde-oscuro);
+    color: var(--texto-sobre-verde);
+}
+
+/* --- Caja: desglose y totales --------------------------------- */
+.desglose-caja {
+    border-top: 2px dashed var(--borde);
+    padding-top: 0.5rem;
+}
+
+.desglose-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.2rem 0;
+    font-size: 0.92rem;
+}
+
+.desglose-fila span {
+    color: var(--texto-suave);
+}
+
+.desglose-suma {
+    color: var(--verde-oscuro);
+}
+
+.desglose-resta {
+    color: #8A1B1B;
+}
+
+.subtitulo-panel {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texto-suave);
+    margin: 1rem 0 0.5rem;
+}
+
+.medios-resumen {
+    border-top: 2px dashed var(--borde);
+    padding-top: 0.5rem;
+}
+
+.medio-resumen-fila {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--borde);
+}
+
+.medio-resumen-fila:last-child {
+    border-bottom: none;
+}
+
+.medio-resumen-fila strong {
+    margin-left: auto;
+}
+
+/* --- Lineas por cobrar ----------------------------------------- */
+.lista-cobrar {
+    display: flex;
+    flex-direction: column;
+}
+
+.fila-cobrar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--borde);
+    text-decoration: none;
+    color: var(--texto);
+    min-height: 68px;
+}
+
+.fila-cobrar:last-child {
+    border-bottom: none;
+}
+
+.fila-cobrar:hover {
+    background-color: var(--amarillo-claro);
+}
+
+.fila-cobrar-compacta {
+    min-height: 52px;
+    padding: 0.5rem 0.25rem;
+}
+
+.fila-cobrar-mesa {
+    font-size: 1.6rem;
+    font-weight: 800;
+    min-width: 3.5rem;
+    text-align: center;
+    color: var(--verde-oscuro);
+}
+
+.fila-cobrar-datos {
+    flex: 1 1 auto;
+    font-size: 0.92rem;
+}
+
+.fila-cobrar-total {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* --- Detalle de venta ------------------------------------------ */
+.pago-detalle {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--borde);
+}
+
+.pago-detalle:last-child {
+    border-bottom: none;
+}
+
+.pago-detalle > i {
+    font-size: 1.2rem;
+    color: var(--verde-oscuro);
+    margin-top: 0.1rem;
+}
+
+.linea-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.3rem 0;
+}
+
+.linea-total strong {
+    font-size: 1.15rem;
+    white-space: nowrap;
+}
+
+.linea-total-final {
+    border-top: 2px solid var(--borde);
+    margin-top: 0.4rem;
+    padding-top: 0.6rem;
+    font-weight: 700;
+}
+
+.linea-total-final strong {
+    font-size: 1.6rem;
+}
+
+.lista-datos {
+    margin: 0;
+}
+
+.lista-datos dt {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texto-suave);
+    margin-top: 0.6rem;
+}
+
+.lista-datos dd {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* --- Tipos de movimiento de caja -------------------------------- */
+.tipos-movimiento {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.tipo-movimiento {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 72px;
+    padding: 0.5rem;
+    border: 3px solid var(--borde);
+    border-radius: var(--radio-chico);
+    background-color: var(--blanco);
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+}
+
+.tipo-movimiento input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.tipo-movimiento i {
+    font-size: 1.4rem;
+}
+
+.tipo-movimiento:has(input:checked) {
+    border-color: var(--verde-oscuro);
+    background-color: var(--verde-claro);
+}
+
+/* --- Paginación ------------------------------------------------- */
+.paginacion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.paginacion a {
+    padding: 0.5rem 0.9rem;
+    border: 2px solid var(--verde-oscuro);
+    border-radius: var(--radio-chico);
+    text-decoration: none;
+    color: var(--verde-oscuro);
+    font-weight: 700;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.paginacion span {
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+}
+
+/* ================================================================
    UTILIDADES
    ================================================================ */
 

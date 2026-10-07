@@ -269,6 +269,21 @@ function post_crudo(string $clave, string $porDefecto = ''): string
 }
 
 /**
+ * Toma un valor del POST que es un grupo de campos.
+ *
+ * El post() normal devuelve string, así que no sirve para cosas
+ * como pagos[0][importe]. Esto devuelve el grupo ya limpio: si
+ * no vino nada o vino algo que no es un grupo, devuelve un grupo
+ * vacío.
+ */
+function post_array(string $clave): array
+{
+    $valor = $_POST[$clave] ?? [];
+
+    return is_array($valor) ? $valor : [];
+}
+
+/**
  * Toma un valor del GET.
  */
 function get(string $clave, string $porDefecto = ''): string
@@ -575,6 +590,41 @@ function slug_estado(string $estado): string
     $slug = preg_replace('/[^a-z0-9-]/', '', $slug) ?? '';
 
     return $slug !== '' ? $slug : 'neutra';
+}
+
+/**
+ * Lee un valor de la tabla de configuracion.
+ *
+ * Antes cada pantalla hacia su propio SELECT. Con la Etapa 4 ya son
+ * varias lecturas del mismo tipo, asi que se centraliza aca.
+ *
+ * @param mixed $defecto Lo que se devuelve si la clave no existe.
+ */
+function config_valor(string $clave, $defecto = null)
+{
+    static $cache = null;
+
+    if ($cache === null) {
+        $cache = [];
+
+        foreach (DB::all('SELECT clave, valor FROM configuracion') as $fila) {
+            $cache[(string) $fila['clave']] = (string) $fila['valor'];
+        }
+    }
+
+    return $cache[$clave] ?? $defecto;
+}
+
+/**
+ * Lee un valor de configuracion como booleano.
+ *
+ * La base guarda '1' y '0' como texto.
+ */
+function config_bool(string $clave, bool $defecto = false): bool
+{
+    $valor = config_valor($clave);
+
+    return $valor === null ? $defecto : ((string) $valor === '1');
 }
 
 /**

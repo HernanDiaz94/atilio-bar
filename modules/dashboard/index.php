@@ -82,6 +82,19 @@ if ($esAdmin) {
     );
 }
 
+// --- Caja y cobros (Etapa 4) -------------------------------------
+// Le interesa a los dos: el vendedor necesita saber si puede
+// cobrar, el administrador cuanto lleva el turno.
+$cajaAbierta  = Caja::abierta();
+$esperadoCaja = $cajaAbierta !== null ? Caja::esperado((int) $cajaAbierta['id']) : null;
+$porCobrar    = Venta::pendientesDeCobro();
+
+$ventasHoy = ['ventas' => 0, 'bruto' => 0.0, 'descuentos' => 0.0, 'neto' => 0.0];
+
+if ($cajaAbierta !== null) {
+    $ventasHoy = Venta::totales(date('Y-m-d'), date('Y-m-d'));
+}
+
 // --- Datos comunes (los dos roles) -----------------------------
 $configuracion = DB::all('SELECT clave, valor FROM configuracion ORDER BY clave');
 

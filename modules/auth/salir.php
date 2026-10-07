@@ -24,7 +24,13 @@ if (!Auth::logueado()) {
 // Guardamos el nombre para el mensaje de despedida.
 $nombre = Auth::nombre_completo();
 
-// Destruye la sesión y registra el logout en la auditoría.
+// Destruye la sesion y registra el logout en la auditoria.
+
+// Los descuentos pendientes son por sesion: si el mozo se va a
+// mitad de un cobro, no tiene que encontrarse manana el
+// descuento de una mesa que ya no existe.
+descuentos_vaciar();
+
 Auth::logout();
 
 // logout() destruye la sesión por completo, así que abrimos una nueva

@@ -126,6 +126,21 @@ date_default_timezone_set(APP_TIMEZONE);
 // 4) Núcleo de la aplicación
 // ------------------------------------------------------------
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/schema.php';
+
+// Si falta alguna migracion, se avisa con todas las letras en vez
+// de dejar que la primera pantalla que la consulta se caiga con un
+// error 500 en blanco. install.php queda fuera: es justamente la
+// pantalla que crea la base.
+if (PHP_SAPI !== 'cli'
+    && basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) !== 'install.php'
+    && Schema::puedeHaberTablas()) {
+    $faltan = Schema::faltan();
+
+    if ($faltan !== []) {
+        Schema::mostrarAviso($faltan);
+    }
+}
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/auth.php';
@@ -135,6 +150,10 @@ require_once __DIR__ . '/auditoria.php';
 require_once __DIR__ . '/stock.php';
 // Mesas, comandas y reservas (Etapa 3).
 require_once __DIR__ . '/mesas.php';
+// Ventas, cobros y caja (Etapa 4).
+require_once __DIR__ . '/ventas.php';
+// El descuento pendiente mientras se cobra (Etapa 4).
+require_once __DIR__ . '/descuentos.php';
 // El router cierra el arranque: es el que despacha a los módulos.
 require_once __DIR__ . '/router.php';
 

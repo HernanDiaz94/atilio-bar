@@ -30,6 +30,8 @@ if ($esAdmin) {
 
 require APP_ROOT . '/includes/header.php';
 ?>
+<?php require APP_ROOT . '/modules/dashboard/vistas/caja.php'; ?>
+
 
 <!-- ================= ALERTAS DE STOCK ================= -->
 <!-- Van antes del resumen: si hay algo para reponer, es lo
