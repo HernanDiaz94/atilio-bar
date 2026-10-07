@@ -30,6 +30,7 @@ $datos = [
     'costo'          => post('costo'),
     'stock_minimo'   => a_numero(post('stock_minimo', '0')),
     'unidad'         => post('unidad', 'unidad'),
+    'formas_venta'   => post('formas_venta'),
     'controla_stock' => post('controla_stock') === '1' ? 1 : 0,
     'es_combo'       => post('es_combo') === '1' ? 1 : 0,
     'activo'         => post('activo') === '1' ? 1 : 0,
@@ -82,14 +83,42 @@ $reglas = [
         'requerido' => true,
         'etiqueta'  => 'unidad',
     ],
+    'formas_venta' => [
+        'max'      => 160,
+        'etiqueta' => 'formas de venta',
+    ],
 ];
 
 $errores = validar([
-    'nombre'      => $datos['nombre'],
-    'descripcion' => $datos['descripcion'],
-    'codigo'      => $datos['codigo'],
-    'unidad'      => $datos['unidad'],
+    'nombre'       => $datos['nombre'],
+    'descripcion'  => $datos['descripcion'],
+    'codigo'       => $datos['codigo'],
+    'unidad'       => $datos['unidad'],
+    'formas_venta' => $datos['formas_venta'],
 ], $reglas);
+
+// Las formas de venta tienen que tener sentido: si el campo no está
+// vacío, tiene que haber al menos una cantidad válida.
+if ($datos['formas_venta'] !== '') {
+    $parsed = formas_venta($datos['formas_venta']);
+
+    // Si el texto tenía algo pero no se pudo interpretar ninguna
+    // cantidad, es un error de tipeo: mejor avisar que dejar al
+    // mozo con un producto que solo se vende de a una.
+    $hayCantidad = false;
+
+    foreach ($parsed as $forma) {
+        if ($forma['cantidad'] != 1.0 || $forma['etiqueta'] !== '1') {
+            $hayCantidad = true;
+            break;
+        }
+    }
+
+    if (!$hayCantidad) {
+        $errores['formas_venta'] = 'Ninguna de las formas es válida. '
+            . 'Escribí la cantidad, por ejemplo: 1:Unidad,6:Media docena,12:Docena';
+    }
+}
 
 // Categoría: tiene que existir y estar activa
 if ($datos['categoria_id'] <= 0) {
@@ -167,6 +196,7 @@ if (!empty($errores) || !empty($erroresGenerales)) {
         'stock_actual'   => cantidad($stockInicial, 2),
         'stock_minimo'   => cantidad($datos['stock_minimo'], 2),
         'unidad'         => $datos['unidad'],
+        'formas_venta'   => $datos['formas_venta'],
         'controla_stock' => (string) $datos['controla_stock'],
         'es_combo'       => (string) $datos['es_combo'],
         'activo'         => (string) $datos['activo'],
@@ -207,6 +237,7 @@ try {
             'costo'          => $costoValor,
             'stock_minimo'   => $datos['controla_stock'] === 1 ? $datos['stock_minimo'] : 0.0,
             'unidad'         => $datos['unidad'],
+            'formas_venta'   => $datos['formas_venta'],
             'controla_stock' => $datos['controla_stock'],
             'es_combo'       => $datos['es_combo'],
             'activo'         => $datos['activo'],

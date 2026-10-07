@@ -379,6 +379,17 @@ function rutas_app(): array
             'ocultar'     => 'es_admin',
         ],
 
+        // Generar varias mesas de un tirón. Es lo cómodo cuando el
+        // bar tiene 20 o 30 mesas y no querés cargarlas de a una.
+        'mesas/generar' => [
+            'controlador' => 'mesas/generar_mesas.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Generar mesas',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
         // ---------- Reservas (Etapa 3) ----------
         // Las ve el vendedor: tiene que saber quién llega a las 22.
         'reservas' => [

@@ -208,6 +208,8 @@ require APP_ROOT . '/includes/header.php';
                 que nunca tuvo ningún pedido.
             </p>
         </div>
+
+        <?php require APP_ROOT . '/modules/mesas/vistas/generar.php'; ?>
     </div>
 </div>
 

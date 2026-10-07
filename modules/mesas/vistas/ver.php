@@ -224,24 +224,30 @@ require APP_ROOT . '/includes/header.php';
 
                 <h3 class="categoria-titulo"><?= e((string) $categoria['nombre']) ?></h3>
 
-                <div class="grilla-productos" id="grillaProductos">
+                <div class="grilla-productos">
                     <?php foreach ($deEsta as $producto): ?>
                         <?php
                         $pid = (int) $producto['id'];
                         $conStock = (int) $producto['controla_stock'] === 1;
                         $alerta = isset($stockAlerta[$pid]);
                         $agotado = $conStock && (float) $producto['stock_actual'] <= 0;
-                        ?>
-                        <form method="post" action="<?= e(url('mesas/agregar-producto')) ?>"
-                              class="producto-boton <?= $agotado ? 'producto-agotado' : '' ?>"
-                              data-nombre="<?= e(mb_strtolower((string) $producto['nombre'])) ?>">
-                            <?= csrf_campo() ?>
-                            <input type="hidden" name="comanda_id" value="<?= (int) $comanda['id'] ?>">
-                            <input type="hidden" name="producto_id" value="<?= $pid ?>">
 
+                        // Si el producto se vende de varias formas (por
+                        // ejemplo las empanadas: de a una, por media
+                        // docena y por docena), cada forma es un boton
+                        // propio. Asi el mozo nunca escribe la cantidad.
+                        $formas = formas_venta((string) ($producto['formas_venta'] ?? ''));
+                        $variasFormas = count($formas) > 1;
+                        ?>
+
+                        <div class="producto-boton-wrap"
+                             data-nombre="<?= e(mb_strtolower((string) $producto['nombre'])) ?>">
                             <div class="producto-boton-cuerpo">
                                 <span class="producto-nombre"><?= e((string) $producto['nombre']) ?></span>
-                                <span class="producto-precio"><?= e(money($producto['precio_venta'])) ?></span>
+                                <span class="producto-precio">
+                                    <?= e(money($producto['precio_venta'])) ?>
+                                    <?= $variasFormas ? 'c/u' : '' ?>
+                                </span>
 
                                 <?php if ($conStock): ?>
                                     <span class="producto-stock">
@@ -264,13 +270,39 @@ require APP_ROOT . '/includes/header.php';
                                 <?php endif; ?>
                             </div>
 
-                            <div class="producto-boton-cantidad">
-                                <button type="button" class="btn-resta" tabindex="-1" aria-label="Restar uno">&minus;</button>
-                                <input type="text" name="cantidad" class="producto-cantidad"
-                                       value="1" inputmode="numeric" aria-label="Cantidad">
-                                <button type="button" class="btn-suma" tabindex="-1" aria-label="Sumar uno">+</button>
-                            </div>
-                        </form>
+                            <?php if ($variasFormas): ?>
+                                <!-- Un <form> por forma: cada boton carga
+                                     directo lo que dice. -->
+                                <div class="formas-venta">
+                                    <?php foreach ($formas as $forma): ?>
+                                        <form method="post" action="<?= e(url('mesas/agregar-producto')) ?>">
+                                            <?= csrf_campo() ?>
+                                            <input type="hidden" name="comanda_id" value="<?= (int) $comanda['id'] ?>">
+                                            <input type="hidden" name="producto_id" value="<?= $pid ?>">
+                                            <input type="hidden" name="cantidad" value="<?= e(cantidad($forma['cantidad'])) ?>">
+                                            <button type="submit"
+                                                    class="forma-boton <?= $agotado ? 'forma-boton-agotado' : '' ?>"
+                                                    title="<?= e(cantidad($forma['cantidad'])) ?> <?= e((string) $producto['nombre']) ?> por <?= e(money((float) $producto['precio_venta'] * $forma['cantidad'])) ?>">
+                                                <strong><?= e($forma['etiqueta']) ?></strong>
+                                                <small><?= e(money((float) $producto['precio_venta'] * $forma['cantidad'])) ?></small>
+                                            </button>
+                                        </form>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <form method="post" action="<?= e(url('mesas/agregar-producto')) ?>"
+                                      class="producto-boton-cantidad">
+                                    <?= csrf_campo() ?>
+                                    <input type="hidden" name="comanda_id" value="<?= (int) $comanda['id'] ?>">
+                                    <input type="hidden" name="producto_id" value="<?= $pid ?>">
+
+                                    <button type="button" class="btn-resta" tabindex="-1" aria-label="Restar uno">&minus;</button>
+                                    <input type="text" name="cantidad" class="producto-cantidad"
+                                           value="1" inputmode="numeric" aria-label="Cantidad de <?= e((string) $producto['nombre']) ?>">
+                                    <button type="button" class="btn-suma" tabindex="-1" aria-label="Sumar uno">+</button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
                     <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>

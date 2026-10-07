@@ -40,8 +40,8 @@ $categorias = DB::all(
 
 $productos = DB::all(
     'SELECT p.id, p.nombre, p.precio_venta, p.controla_stock, p.stock_actual,
-            p.stock_minimo, p.unidad, p.es_combo, c.nombre AS categoria,
-            c.id AS categoria_id
+            p.stock_minimo, p.unidad, p.formas_venta, p.es_combo,
+            c.nombre AS categoria, c.id AS categoria_id
      FROM productos p
      INNER JOIN categorias c ON c.id = p.categoria_id
      WHERE p.activo = 1

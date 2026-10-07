@@ -258,14 +258,28 @@ CREATE TABLE IF NOT EXISTS `reservas` (
 
 
 -- ==================================================================
---  5) DATOS INICIALES
---  Un salon de 8 mesas, 4 de vereda y 3 de barra. Se adaptan
---  desde la pantalla de mesas.
+-- ==================================================================
+--  5) LAS DIEZ MESAS
+--
+--  Diez mesas: cinco del salón, tres de la vereda y dos de la
+--  barra. Es un punto de partida, no un tope.
+--
+--  Para cambiar la cantidad NO hay que tocar este archivo. Desde
+--  "Administrar mesas" se puede:
+--
+--    - dar de alta o baja una mesa de a una;
+--    - generar varias de un tirón con "Generar mesas en tanda",
+--      que es lo cómodo cuando el bar tiene 20 o 30 mesas.
+--
+--  Las mesas con historial de pedidos no se borran: se dan de
+--  baja, así los informes viejos siguen cuadrando.
 --
 --  Se inserta mesa por mesa con NOT EXISTS, igual que los
 --  productos de la etapa 2: si el archivo se corre dos veces no
 --  se duplican.
 -- ==================================================================
+
+-- --- Salón: las cinco mesas de adentro --------------------------
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
 SELECT '1', 'Esquina del salon', 4, 'salon', 1, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '1');
@@ -283,21 +297,10 @@ SELECT '4', '', 4, 'salon', 4, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '4');
 
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT '5', '', 4, 'salon', 5, 1, NOW()
+SELECT '5', 'Del fondo', 8, 'salon', 5, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '5');
 
-INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT '6', '', 4, 'salon', 6, 1, NOW()
-WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '6');
-
-INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT '7', '', 6, 'salon', 7, 1, NOW()
-WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '7');
-
-INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT '8', '', 8, 'salon', 8, 1, NOW()
-WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '8');
-
+-- --- Vereda: tres mesas afuera ----------------------------------
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
 SELECT 'V1', 'Vereda izquierda', 2, 'vereda', 1, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'V1');
@@ -310,10 +313,7 @@ INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`,
 SELECT 'V3', '', 2, 'vereda', 3, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'V3');
 
-INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT 'V4', '', 4, 'vereda', 4, 1, NOW()
-WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'V4');
-
+-- --- Barra: dos lugares ----------------------------------------
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
 SELECT 'B1', 'Barra alta', 2, 'barra', 1, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'B1');
@@ -322,11 +322,10 @@ INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`,
 SELECT 'B2', '', 2, 'barra', 2, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'B2');
 
-INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT 'B3', '', 2, 'barra', 3, 1, NOW()
-WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'B3');
 
-
+-- ==================================================================
+--  6) CONFIGURACION
+-- ==================================================================
 INSERT INTO `configuracion`
     (`clave`, `valor`, `tipo`, `descripcion`, `grupo`, `editable`, `creado_en`)
 VALUES
@@ -334,7 +333,10 @@ VALUES
     ('mesa_zona_vereda', 'Vereda', 'texto', 'Nombre de la zona de la vereda.', 'general', 1, NOW()),
     ('mesa_zona_barra',  'Barra',  'texto', 'Nombre de la zona de la barra.',  'general', 1, NOW()),
     ('comanda_minutos_vigencia', '240', 'numero',
-     'Minutos que una mesa queda ocupada si se abre y no se toca.', 'general', 1, NOW())
+     'Minutos que una mesa queda ocupada si se abre y no se toca.', 'general', 1, NOW()),
+    ('mesas_capacidad_default', '4', 'numero',
+     'Lugares que se cargan por omision al crear una mesa nueva. Se cambia desde el formulario de mesa nueva.',
+     'general', 1, NOW())
 ON DUPLICATE KEY UPDATE `clave` = `clave`;
 
 

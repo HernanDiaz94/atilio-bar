@@ -79,6 +79,12 @@ CREATE TABLE IF NOT EXISTS `productos` (
                       COMMENT 'Debajo de esto se muestra la alerta de stock bajo',
     `unidad`          VARCHAR(20)   NOT NULL DEFAULT 'unidad'
                       COMMENT 'unidad, medida, botella, litro, kg, docena',
+    -- Formas en que se puede pedir, para que el mozo no tenga que
+    -- escribir la cantidad. Ejemplo de las empanadas:
+    --   1:unidad,6:media docena,12:docena
+    -- Vacio = solo se vende de a una, que es lo normal.
+    `formas_venta`    VARCHAR(160)  NOT NULL DEFAULT ''
+                      COMMENT 'cantidad:etiqueta, separadas por coma',
     `controla_stock`  TINYINT(1)    NOT NULL DEFAULT 1,
     `es_combo`        TINYINT(1)    NOT NULL DEFAULT 0
                       COMMENT '1 = tiene receta que descuenta insumos',
@@ -271,115 +277,97 @@ ON DUPLICATE KEY UPDATE `clave` = `clave`;
 --  compra la mercadería. El vendedor nunca los ve igual.
 -- ==================================================================
 INSERT INTO `categorias` (`nombre`, `descripcion`, `orden`, `activo`, `creado_en`)
-SELECT 'Bebidas', 'Cerveza, gaseosas, agua y demas listos para servir', 1, 1, NOW()
+SELECT 'Bebidas', 'Vasos de fernet, gancia y vino', 1, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `categorias` WHERE `nombre` = 'Bebidas');
 
 INSERT INTO `categorias` (`nombre`, `descripcion`, `orden`, `activo`, `creado_en`)
-SELECT 'Tragos', 'Combinados y tragos de la carta', 2, 1, NOW()
+SELECT 'Tragos', 'Tragos y combinados. Por ahora vacia', 2, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `categorias` WHERE `nombre` = 'Tragos');
 
 INSERT INTO `categorias` (`nombre`, `descripcion`, `orden`, `activo`, `creado_en`)
-SELECT 'Comidas', 'Pizza y empanadas. Se pueden agregar más cosas', 3, 1, NOW()
+SELECT 'Comidas', 'Empanadas y pizzeria. Se pueden agregar más cosas', 3, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `categorias` WHERE `nombre` = 'Comidas');
 
 INSERT INTO `categorias` (`nombre`, `descripcion`, `orden`, `activo`, `creado_en`)
-SELECT 'Insumos', 'Licores, zumos y cosas para las preparaciones. No se venden solos', 4, 1, NOW()
+SELECT 'Insumos', 'Licores y zumos para las preparaciones. No se venden solos', 4, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `categorias` WHERE `nombre` = 'Insumos');
 
 
--- --- Bebidas: estas SÍ llevan control de stock --------------------
+-- --- BEBIDAS ---------------------------------------------------------
+-- Son las tres que se venden por vaso. Todas llevan control de stock:
+-- el fernét y la gancia se miden por frasco, el vino por botella, así
+-- que el stock se lleva en la botella cerrada y no en el vaso servido.
+--
+-- Para agregar o quitar bebidas no hay que tocar este archivo: se
+-- hace desde Productos.
 INSERT INTO `productos`
     (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Cerveza en botella', '', 2500.00, NULL, 24, 6, 'botella', 1, 0, 1, NOW()
+     `stock_actual`, `stock_minimo`, `unidad`, `formas_venta`,
+     `controla_stock`, `es_combo`, `activo`, `creado_en`)
+SELECT NULL, c.id, 'Vaso de fernet', '', 2200.00, NULL, 8, 2, 'vaso', '', 1, 0, 1, NOW()
 FROM `categorias` c WHERE c.`nombre` = 'Bebidas'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Cerveza en botella');
+  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Vaso de fernet');
 
 INSERT INTO `productos`
     (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Gaseosa', '', 1500.00, NULL, 48, 12, 'unidad', 1, 0, 1, NOW()
+     `stock_actual`, `stock_minimo`, `unidad`, `formas_venta`,
+     `controla_stock`, `es_combo`, `activo`, `creado_en`)
+SELECT NULL, c.id, 'Vaso de gancia', '', 2200.00, NULL, 8, 2, 'vaso', '', 1, 0, 1, NOW()
 FROM `categorias` c WHERE c.`nombre` = 'Bebidas'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Gaseosa');
+  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Vaso de gancia');
 
 INSERT INTO `productos`
     (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Agua mineral', '', 1200.00, NULL, 36, 12, 'unidad', 1, 0, 1, NOW()
+     `stock_actual`, `stock_minimo`, `unidad`, `formas_venta`,
+     `controla_stock`, `es_combo`, `activo`, `creado_en`)
+SELECT NULL, c.id, 'Vaso de vino', '', 2500.00, NULL, 6, 2, 'vaso', '', 1, 0, 1, NOW()
 FROM `categorias` c WHERE c.`nombre` = 'Bebidas'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Agua mineral');
+  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Vaso de vino');
 
 
--- --- Tragos: preparaciones, sin control de stock -----------------
--- El cóctel no descuenta nada por sí solo. Si más adelante querés
--- que el gin tonic descuente la tónica, se le arma la receta desde
--- la pantalla del producto.
+-- --- COMIDAS ---------------------------------------------------------
+-- Las empanadas se venden de a una, por media docena o por docena.
+-- Eso se declara en formas_venta, y la pantalla del pedido muestra
+-- tres botones: "Unidad", "Media docena" y "Docena".
+--
+-- El precio es el de UNA empanada: el sistema multiplica solo. Si
+-- preferís cobrar la docena a un precio cerrado, se cambia el
+-- precio y listo.
 INSERT INTO `productos`
     (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Gin tonic', '', 4500.00, NULL, 0, 0, 'unidad', 0, 0, 1, NOW()
-FROM `categorias` c WHERE c.`nombre` = 'Tragos'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Gin tonic');
-
-INSERT INTO `productos`
-    (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Cerveza rubia Guinness 357', '', 5000.00, NULL, 0, 0, 'unidad', 0, 0, 1, NOW()
-FROM `categorias` c WHERE c.`nombre` = 'Tragos'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Cerveza rubia Guinness 357');
-
-INSERT INTO `productos`
-    (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Fernet', '', 3000.00, NULL, 0, 0, 'unidad', 0, 0, 1, NOW()
-FROM `categorias` c WHERE c.`nombre` = 'Tragos'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Fernet');
-
-
--- --- Comidas: preparaciones, sin control de stock ----------------
-INSERT INTO `productos`
-    (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Pizza muzzarella', '', 6500.00, NULL, 0, 0, 'unidad', 0, 0, 1, NOW()
+     `stock_actual`, `stock_minimo`, `unidad`, `formas_venta`,
+     `controla_stock`, `es_combo`, `activo`, `creado_en`)
+SELECT NULL, c.id, 'Empanada de carne', '', 900.00, NULL, 0, 0, 'unidad',
+       '1:Unidad,6:Media docena,12:Docena', 0, 0, 1, NOW()
 FROM `categorias` c WHERE c.`nombre` = 'Comidas'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Pizza muzzarella');
+  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Empanada de carne');
 
 INSERT INTO `productos`
     (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Pizza especial', '', 7500.00, NULL, 0, 0, 'unidad', 0, 0, 1, NOW()
+     `stock_actual`, `stock_minimo`, `unidad`, `formas_venta`,
+     `controla_stock`, `es_combo`, `activo`, `creado_en`)
+SELECT NULL, c.id, 'Empanada de pollo', '', 900.00, NULL, 0, 0, 'unidad',
+       '1:Unidad,6:Media docena,12:Docena', 0, 0, 1, NOW()
 FROM `categorias` c WHERE c.`nombre` = 'Comidas'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Pizza especial');
+  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Empanada de pollo');
 
 INSERT INTO `productos`
     (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Empanadas de carne (x3)', '', 3500.00, NULL, 0, 0, 'unidad', 0, 0, 1, NOW()
+     `stock_actual`, `stock_minimo`, `unidad`, `formas_venta`,
+     `controla_stock`, `es_combo`, `activo`, `creado_en`)
+SELECT NULL, c.id, 'Empanada de humita', '', 1000.00, NULL, 0, 0, 'unidad',
+       '1:Unidad,6:Media docena,12:Docena', 0, 0, 1, NOW()
 FROM `categorias` c WHERE c.`nombre` = 'Comidas'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` LIKE 'Empanadas de carne%');
-
-INSERT INTO `productos`
-    (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Empanadas de pollo (x3)', '', 3500.00, NULL, 0, 0, 'unidad', 0, 0, 1, NOW()
-FROM `categorias` c WHERE c.`nombre` = 'Comidas'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` LIKE 'Empanadas de pollo%');
+  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Empanada de humita');
 
 
--- --- Insumos: para armar recetas de tragos -----------------------
-INSERT INTO `productos`
-    (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Tónica', 'Insumo para el gin tonic', 0.00, NULL, 30, 8, 'unidad', 1, 0, 1, NOW()
-FROM `categorias` c WHERE c.`nombre` = 'Insumos'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Tónica');
-
-INSERT INTO `productos`
-    (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Gin', 'Insumo para tragos', 0.00, NULL, 2, 1, 'botella', 1, 0, 1, NOW()
-FROM `categorias` c WHERE c.`nombre` = 'Insumos'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Gin');
+-- --- TRAGOS ----------------------------------------------------------
+-- Queda vacía a propósito: hoy no se venden tragos. Cuando cargues
+-- el primero, la categoría ya está y solo hay que dar de alta el
+-- producto desde la pantalla de Productos.
+-- Si más adelante querés que un combo descuente insumos (por ejemplo
+-- un gin tonic que saca gin y tónica), se le arma la receta desde
+-- el producto: la categoría Insumos está lista para eso.
 
 
 SET FOREIGN_KEY_CHECKS = 1;

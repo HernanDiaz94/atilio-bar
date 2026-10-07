@@ -124,6 +124,35 @@ require APP_ROOT . '/includes/header.php';
                 <?php endif; ?>
             </div>
 
+            <!-- ============ FORMAS DE VENTA ============ -->
+            <!-- Ejemplo: 1:Unidad,6:Media docena,12:Docena
+                 Con esto el mozo ve tres botones en vez de
+                 tener que escribir la cantidad. -->
+            <div class="campo mb-3 <?= isset($errores['formas_venta']) ? 'campo-error' : '' ?>">
+                <label for="formas_venta" class="form-label">Formas de venta</label>
+                <input type="text" id="formas_venta" name="formas_venta"
+                       class="form-control"
+                       value="<?= e((string) $valores['formas_venta']) ?>"
+                       maxlength="160" data-etiqueta="formas de venta"
+                       placeholder="1:Unidad,6:Media docena,12:Docena">
+                <?php if (isset($errores['formas_venta'])): ?>
+                    <span class="error-campo"><?= e((string) $errores['formas_venta']) ?></span>
+                <?php else: ?>
+                    <span class="form-text"><?= e(ayuda_formas_venta()) ?></span>
+
+                    <?php if ((string) $valores['formas_venta'] !== ''): ?>
+                        <div class="vista-previa-formas">
+                            En el pedido va a aparecer así:
+                            <?php foreach (formas_venta((string) $valores['formas_venta']) as $forma): ?>
+                                <span class="forma-previa">
+                                    <?= e($forma['etiqueta']) ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+
             <!-- ================= PRECIO ================= -->
             <div class="campo mb-3 <?= isset($errores['precio_venta']) ? 'campo-error' : '' ?>">
                 <label for="precio_venta" class="form-label">Precio de venta <span class="text-danger">*</span></label>

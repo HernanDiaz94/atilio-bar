@@ -1181,7 +1181,11 @@ textarea:focus-visible {
     gap: 0.6rem;
 }
 
-.producto-boton {
+/* Envolvente de cada producto. Antes cada producto era un <form>
+   entero; ahora el <form> es solo de los controles, porque un
+   producto con varias formas de venta necesita un formulario por
+   forma. */
+.producto-boton-wrap {
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -1189,8 +1193,6 @@ textarea:focus-visible {
     border: 2px solid var(--borde);
     border-radius: var(--radio-chico);
     padding: 0.6rem;
-    margin: 0;
-    align-items: stretch;
 }
 
 .producto-boton-cuerpo {
@@ -1222,9 +1224,92 @@ textarea:focus-visible {
 }
 
 /* Sin stock: se ve pero se avisa */
-.producto-agotado {
+.producto-boton-wrap:has(.stock-cero) {
     border-color: #A33A3A;
     background-color: #FFF5F5;
+}
+
+/* --- Formas de venta: unidad / media docena / docena ---------------
+   Las empanadas, por ejemplo, se cargan con un solo toque: "Docena"
+   y listo. El mozo nunca escribe la cantidad. */
+.formas-venta {
+    display: flex;
+    gap: 0.3rem;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.formas-venta form {
+    margin: 0;
+}
+
+.forma-boton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.05rem;
+    min-width: 78px;
+    min-height: 56px;
+    padding: 0.3rem 0.5rem;
+    border: 2px solid var(--verde-oscuro);
+    border-radius: var(--radio-chico);
+    background-color: var(--verde-claro);
+    color: var(--texto-sobre-verde);
+    cursor: pointer;
+    line-height: 1.15;
+}
+
+.forma-boton strong {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.forma-boton small {
+    font-size: 0.72rem;
+    opacity: 0.85;
+    font-weight: 600;
+}
+
+.forma-boton:hover {
+    background-color: var(--verde-medio);
+}
+
+.forma-boton:active {
+    transform: scale(0.96);
+}
+
+.forma-boton-agotado {
+    border-color: #A33A3A;
+    background-color: #F3D9D9;
+    color: #6E1414;
+}
+
+.producto-boton-wrap:has(.formas-venta) {
+    flex-wrap: wrap;
+}
+
+/* Vista previa de las formas, en el formulario de productos */
+.vista-previa-formas {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+}
+
+.forma-previa {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border: 2px solid var(--verde-oscuro);
+    border-radius: var(--radio-chico);
+    background-color: var(--verde-claro);
+    color: var(--texto-sobre-verde);
+    font-weight: 700;
+    font-size: 0.82rem;
 }
 
 /* Cantidad +/- */
@@ -1233,6 +1318,7 @@ textarea:focus-visible {
     align-items: center;
     gap: 0.2rem;
     flex: 0 0 auto;
+    margin: 0;
 }
 
 .btn-suma,
@@ -1300,6 +1386,22 @@ textarea:focus-visible {
         width: 46px;
         height: 46px;
         font-size: 1.05rem;
+    }
+
+    /* Con el celular en la mano, las formas de venta se ponen
+       debajo del nombre y ocupan todo el ancho: se tocan mejor. */
+    .formas-venta {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .formas-venta form {
+        flex: 1 1 0;
+    }
+
+    .forma-boton {
+        width: 100%;
+        min-height: 60px;
     }
 }
 

@@ -46,6 +46,7 @@ $valores = [
     'stock_actual'   => $entradas['stock_actual']   ?? ($producto['stock_actual']   ?? '0'),
     'stock_minimo'   => $entradas['stock_minimo']   ?? ($producto['stock_minimo']   ?? '0'),
     'unidad'         => $entradas['unidad']         ?? ($producto['unidad']         ?? 'unidad'),
+    'formas_venta'   => $entradas['formas_venta']   ?? ($producto['formas_venta']   ?? ''),
     'controla_stock' => $entradas['controla_stock'] ?? ($producto['controla_stock'] ?? '1'),
     'es_combo'       => $entradas['es_combo']       ?? ($producto['es_combo']       ?? '0'),
     'activo'         => $entradas['activo']         ?? ($producto['activo']         ?? '1'),

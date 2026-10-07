@@ -578,6 +578,83 @@ function slug_estado(string $estado): string
 }
 
 /**
+ * Interpreta la columna `formas_venta` de un producto.
+ *
+ * La forma en que se escribe en la base es una lista separada por
+ * comas, con cantidad y etiqueta:
+ *
+ *     1:Unidad,6:Media docena,12:Docena
+ *
+ * Se usa para que el mozo no tenga que escribir la cantidad: en la
+ * pantalla del pedido aparecen tres botones, "Unidad", "Media
+ * docena" y "Docena".
+ *
+ * Si el producto no tiene formas definidas, se devuelve la única
+ * forma posible, la cantidad 1. Un producto vacío o con basura
+ * guardada devuelve siempre eso, y nunca un error: que una venta
+ * no se pueda cargar por un dato mal tipeado sería peor que vender
+ * de a una.
+ *
+ * @return array<int, array{cantidad: float, etiqueta: string}>
+ */
+function formas_venta(?string $texto): array
+{
+    $formas = [];
+
+    foreach (explode(',', (string) $texto) as $parte) {
+        $parte = trim($parte);
+
+        if ($parte === '') {
+            continue;
+        }
+
+        // "6:Media docena" -> cantidad 6, etiqueta "Media docena".
+        // Si no hay dos puntos, es solo la cantidad.
+        $pos = mb_strpos($parte, ':');
+        $cantidad = $pos === false ? $parte : mb_substr($parte, 0, $pos);
+        $etiqueta = $pos === false ? '' : mb_substr($parte, $pos + 1);
+
+        // Se descarta cualquier cosa que no sea un número: el dato
+        // viene de un formulario y no se puede confiar en él.
+        $numero = a_numero(str_replace(',', '.', trim($cantidad)));
+
+        if ($numero <= 0) {
+            continue;
+        }
+
+        // La etiqueta se recorta y se limita: es texto libre y va
+        // directo a la pantalla.
+        $etiqueta = mb_substr(trim($etiqueta), 0, 20);
+
+        $formas[] = [
+            'cantidad' => $numero,
+            'etiqueta' => $etiqueta !== ''
+                ? $etiqueta
+                : cantidad($numero),
+        ];
+    }
+
+    if (empty($formas)) {
+        return [['cantidad' => 1.0, 'etiqueta' => '1']];
+    }
+
+    // De menor a mayor: el mozo va de una unidad a la docena, no al
+    // revés.
+    usort($formas, static fn ($a, $b) => $a['cantidad'] <=> $b['cantidad']);
+
+    return $formas;
+}
+
+/**
+ * Texto de ayuda para el campo de formas de venta del formulario de
+ * productos, con un ejemplo que se entienda sin contexto.
+ */
+function ayuda_formas_venta(): string
+{
+    return 'Ej: 1:Unidad,6:Media docena,12:Docena — o vacío si se vende de a una.';
+}
+
+/**
  * Devuelve el nombre de la clase de rol, para pintar el badge.
  */
 function clase_rol(string $rol): string

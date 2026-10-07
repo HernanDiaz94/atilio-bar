@@ -407,7 +407,7 @@
 
         if (!campo) { return; }
 
-        var botones = document.querySelectorAll('.producto-boton');
+        var botones = document.querySelectorAll('.producto-boton-wrap');
         var titulos = document.querySelectorAll('.categoria-titulo');
 
         // Mensaje para cuando no hay resultados
@@ -440,7 +440,7 @@
 
                 // Se recorre desde el título hasta el próximo título.
                 while (nodo && !nodo.classList.contains('categoria-titulo')) {
-                    var visibles = nodo.querySelectorAll('.producto-boton');
+                    var visibles = nodo.querySelectorAll('.producto-boton-wrap');
 
                     Array.prototype.forEach.call(visibles, function (b) {
                         if (b.style.display !== 'none') { tieneAlguno = true; }
