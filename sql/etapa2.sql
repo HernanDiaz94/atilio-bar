@@ -330,9 +330,9 @@ FROM `categorias` c WHERE c.`nombre` = 'Bebidas'
 -- Eso se declara en formas_venta, y la pantalla del pedido muestra
 -- tres botones: "Unidad", "Media docena" y "Docena".
 --
--- El precio es el de UNA empanada: el sistema multiplica solo. Si
--- preferís cobrar la docena a un precio cerrado, se cambia el
--- precio y listo.
+-- Solo carne y pollo, que es lo que se vendio al principio. Si
+-- querés agregar otra de otro dia, se da de alta desde Productos.
+
 INSERT INTO `productos`
     (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
      `stock_actual`, `stock_minimo`, `unidad`, `formas_venta`,
@@ -351,14 +351,6 @@ SELECT NULL, c.id, 'Empanada de pollo', '', 900.00, NULL, 0, 0, 'unidad',
 FROM `categorias` c WHERE c.`nombre` = 'Comidas'
   AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Empanada de pollo');
 
-INSERT INTO `productos`
-    (`codigo`, `categoria_id`, `nombre`, `descripcion`, `precio_venta`, `costo`,
-     `stock_actual`, `stock_minimo`, `unidad`, `formas_venta`,
-     `controla_stock`, `es_combo`, `activo`, `creado_en`)
-SELECT NULL, c.id, 'Empanada de humita', '', 1000.00, NULL, 0, 0, 'unidad',
-       '1:Unidad,6:Media docena,12:Docena', 0, 0, 1, NOW()
-FROM `categorias` c WHERE c.`nombre` = 'Comidas'
-  AND NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Empanada de humita');
 
 
 -- --- TRAGOS ----------------------------------------------------------

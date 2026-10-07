@@ -264,7 +264,7 @@ La carta inicial es la que pidió el dueño:
 
 - **Bebidas:** vaso de fernet, vaso de gancia y vaso de vino, los
   tres con control de stock.
-- **Comidas:** empanada de carne, de pollo y de humita. Se venden
+- **Comidas:** empanada de carne y de pollo. Se venden
   de a una, por media docena y por docena, así que en el pedido
   aparecen tres botones por empanada.
 - **Tragos** e **Insumos:** quedan vacías, listas para cuando
