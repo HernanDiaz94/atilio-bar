@@ -318,7 +318,158 @@
     });
 
     // ========================================================
+    // ========================================================
+    //  Mesa: cantidad +/- y buscador de productos (Etapa 3)
+    // ========================================================
+
+    /**
+     * Los productos del pedido tienen botones + y -.
+     *
+     * Cada producto es un <form> propio, así que mandar el pedido
+     * recarga la página. Es lo correcto: el servidor valida,
+     * descuenta stock y deja todo asentado. Mandarlo por AJAX
+     * haría que un error de red dejara el pedido desactualizado
+     * sin que nadie se entere.
+     */
+    function conectarCantidadProductos() {
+        function ajustar(campo, delta) {
+            if (!campo) { return; }
+
+            var valor = parseFloat(campo.value || '1');
+
+            if (isNaN(valor)) { valor = 1; }
+
+            // No se baja de 1: para sacar algo del pedido está el
+            // botón de anular, que es otra cosa.
+            var nuevo = valor + delta;
+
+            if (nuevo < 1) { nuevo = 1; }
+
+            campo.value = nuevo;
+        }
+
+        Array.prototype.forEach.call(
+            document.querySelectorAll('.btn-suma'),
+            function (boton) {
+                boton.addEventListener('click', function (evento) {
+                    evento.preventDefault();
+
+                    var campo = boton.parentElement.querySelector('.producto-cantidad');
+
+                    ajustar(campo, 1);
+
+                    if (campo) { campo.focus(); }
+                });
+            }
+        );
+
+        Array.prototype.forEach.call(
+            document.querySelectorAll('.btn-resta'),
+            function (boton) {
+                boton.addEventListener('click', function (evento) {
+                    evento.preventDefault();
+
+                    var campo = boton.parentElement.querySelector('.producto-cantidad');
+
+                    ajustar(campo, -1);
+
+                    if (campo) { campo.focus(); }
+                });
+            }
+        );
+
+        // La cantidad acepta enteros y medios (medio gin, por ejemplo).
+        Array.prototype.forEach.call(
+            document.querySelectorAll('.producto-cantidad'),
+            function (campo) {
+                campo.addEventListener('change', function () {
+                    var valor = parseFloat(campo.value);
+
+                    if (isNaN(valor) || valor <= 0) {
+                        campo.value = '1';
+                    } else {
+                        campo.value = valor;
+                    }
+                });
+            }
+        );
+    }
+
+    /**
+     * Buscador de productos del pedido.
+     *
+     * Filtra por nombre. Cuando no queda nada avisa: sin ese
+     * mensaje, en un bar se termina creyendo que el producto
+     * no existe.
+     */
+    function conectarBuscadorProductos() {
+        var campo = document.getElementById('buscarProducto');
+
+        if (!campo) { return; }
+
+        var botones = document.querySelectorAll('.producto-boton');
+        var titulos = document.querySelectorAll('.categoria-titulo');
+
+        // Mensaje para cuando no hay resultados
+        var aviso = document.createElement('div');
+        aviso.id = 'avisoBusqueda';
+        aviso.className = 'marco-amarillo p-3 mb-3 centrado';
+        aviso.style.display = 'none';
+        campo.parentElement.appendChild(aviso);
+
+        campo.addEventListener('input', function () {
+            var texto = (campo.value || '').trim().toLowerCase();
+            var encontrados = 0;
+
+            Array.prototype.forEach.call(botones, function (boton) {
+                var nombre = (boton.getAttribute('data-nombre') || '').toLowerCase();
+
+                if (texto === '' || nombre.indexOf(texto) !== -1) {
+                    boton.style.display = '';
+                    encontrados++;
+                } else {
+                    boton.style.display = 'none';
+                }
+            });
+
+            // El título de cada categoría se oculta si debajo no
+            // quedó ningún producto.
+            Array.prototype.forEach.call(titulos, function (titulo) {
+                var tieneAlguno = false;
+                var nodo = titulo.nextElementSibling;
+
+                // Se recorre desde el título hasta el próximo título.
+                while (nodo && !nodo.classList.contains('categoria-titulo')) {
+                    var visibles = nodo.querySelectorAll('.producto-boton');
+
+                    Array.prototype.forEach.call(visibles, function (b) {
+                        if (b.style.display !== 'none') { tieneAlguno = true; }
+                    });
+
+                    nodo = nodo.nextElementSibling;
+                }
+
+                titulo.style.display = tieneAlguno ? '' : 'none';
+            });
+
+            if (texto !== '' && encontrados === 0) {
+                aviso.innerHTML = '<i class="bi bi-search"></i> Ningún producto del bar se llama "'
+                    + escapar(campo.value) + '".';
+                aviso.style.display = '';
+            } else {
+                aviso.style.display = 'none';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        conectarCantidadProductos();
+        conectarBuscadorProductos();
+    });
+
+    // ========================================================
     //  Compra: armar la lista de productos (Etapa 2)
+    // ========================================================
     // ========================================================
 
     /**

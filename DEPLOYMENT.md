@@ -270,3 +270,29 @@ Para cambiar los datos de ejemplo antes de importar, editá los
 `INSERT` de `sql/etapa2.sql`. Si preferís empezar de cero, borrá las
 tablas `productos` y `categorias` desde phpMyAdmin después de
 importar, y armá la carta a mano.
+
+### Qué trae la Etapa 3
+
+Al importarla aparecen las tablas del bar: 8 del salón, 4 de la
+vereda y 3 de la barra. Y aparece la pantalla **Mesas**, que ya es
+la principal del sistema.
+
+Las mesas de ejemplo se ajustan desde **Administrar mesas**
+(disponible solo para el administrador). Si querés empezar con las
+tuyas, borrá la tabla `mesas` desde phpMyAdmin después de importar
+y cargalas a mano.
+
+Lo que podés hacer con esta etapa:
+
+- Ver la grilla de mesas con el estado al día (libre, ocupada, por
+  cobrar, reservada), por color, texto e ícono.
+- Abrir una mesa, cargar productos con botones grandes y ajustar la
+  cantidad.
+- Mover un pedido a otra mesa sin perderlo.
+- Pedir la cuenta (congela el pedido) y reabrirlo si hace falta.
+- Tomar reservas, con nombre y teléfono.
+
+**El stock se descuenta al cargar el producto**, no al cobrar: si se
+anula la línea, vuelve al depósito. Si vendés algo que no tenés, el
+número queda en negativo a propósito, para que al contar el
+depósito se note el faltante.

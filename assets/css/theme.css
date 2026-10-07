@@ -859,6 +859,451 @@ textarea:focus-visible {
 }
 
 /* ================================================================
+   MESAS (Etapa 3)
+   ------------------------------------------------------------
+   La grilla tiene que poder usarse con el dedo, parado, de noche,
+   y a veces con el teléfono en la otra mano. Por eso:
+
+     - Cada mesa es un botón grande (mínimo 120px de alto).
+     - El número va enorme: se reconoce de reojo.
+     - El estado lleva ícono + texto, nunca solo color.
+     - El área de toque es toda la mesa, no solo el texto.
+   ================================================================ */
+
+.resumen-mesas {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.resumen-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    border: 2px solid transparent;
+    white-space: nowrap;
+}
+
+/* Filtro por zona */
+.filtro-zonas {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.filtro-zonas a {
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background-color: var(--blanco);
+    border: 2px solid var(--borde);
+    color: var(--texto);
+    font-weight: 600;
+    text-decoration: none;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.filtro-zonas a:hover {
+    background-color: var(--amarillo-claro);
+}
+
+.filtro-zonas a.zona-activa {
+    background-color: var(--verde-oscuro);
+    border-color: var(--verde-oscuro);
+    color: var(--blanco);
+}
+
+.grupo-mesas {
+    margin-bottom: 1.5rem;
+}
+
+.grupo-titulo {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--texto);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.grupo-cantidad {
+    background-color: var(--verde-claro);
+    color: var(--texto-sobre-verde);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* La grilla: se adapta sola al ancho */
+.grilla-mesas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+}
+
+.grilla-mesas.compacta {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+
+/* Cada mesa */
+.mesa {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    min-height: 130px;
+    padding: 0.85rem 0.6rem;
+    border-radius: var(--radio-borde);
+    border: 3px solid transparent;
+    text-decoration: none;
+    color: var(--texto);
+    font-weight: 600;
+    /* Toda la mesa es tocable, no solo el texto */
+    cursor: pointer;
+    transition: transform 0.08s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mesa:active {
+    transform: scale(0.97);
+}
+
+.mesa-libre {
+    background-color: var(--estado-libre-fondo);
+    border-color: #6E9E63;
+}
+
+.mesa-ocupada {
+    background-color: var(--estado-ocupada-fondo);
+    border-color: #B08A00;
+}
+
+.mesa-reservada {
+    background-color: var(--estado-reservada-fondo);
+    border-color: #3E6E9E;
+}
+
+.mesa-por-cobrar {
+    background-color: var(--estado-por-cobrar-fondo);
+    border-color: #A33A3A;
+}
+
+/* El número se ve de reojo */
+.mesa-numero {
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--texto);
+}
+
+/* El estado, con ícono y texto */
+.mesa-estado .estado-libre,
+.mesa-estado .estado-ocupada,
+.mesa-estado .estado-reservada,
+.mesa-estado .estado-por-cobrar {
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-width: 1px;
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+.mesa-datos {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+}
+
+.mesa-pie {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    width: 100%;
+}
+
+.mesa-total {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--texto);
+}
+
+.mesa-nota {
+    font-size: 0.72rem;
+    color: var(--texto-suave);
+    font-weight: 500;
+}
+
+.mesa-reserva {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--estado-reservada-texto);
+}
+
+/* La mesa lleva mucho rato con gente */
+.mesa-alerta {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    color: #8A1B1B;
+    font-size: 1rem;
+}
+
+/* Mesa deshabilitada (ocupada por otro pedido, en el selector de mover) */
+.mesa-bloqueada {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.mesa-elegida,
+.mesa-actual {
+    outline: 4px solid var(--verde-oscuro);
+    outline-offset: 2px;
+}
+
+/* Selector de comensales: botones redondos grandes */
+.selector-numeros {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.numero-opcion input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.numero-opcion span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background-color: var(--blanco);
+    border: 3px solid var(--verde-oscuro);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--texto);
+    cursor: pointer;
+}
+
+.numero-opcion input:checked + span {
+    background-color: var(--verde-oscuro);
+    color: var(--blanco);
+}
+
+.numero-opcion input:focus-visible + span {
+    outline: 3px solid var(--verde-medio);
+    outline-offset: 2px;
+}
+
+/* El pedido */
+.total-pedido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    padding-top: 0.5rem;
+    border-top: 2px dashed var(--borde);
+}
+
+.total-pedido strong {
+    font-size: 1.5rem;
+    color: var(--texto);
+}
+
+.categoria-titulo {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 1rem 0 0.5rem;
+}
+
+/* Botón grande de acción principal */
+.btn-grande {
+    min-height: 64px;
+    font-size: 1.15rem;
+    width: 100%;
+}
+
+.cantidad-rapida {
+    min-height: 34px;
+}
+
+/* Quitar un producto del pedido.
+   El botón "-" de la tabla mide poco si se deja con btn-sm, y con
+   el dedo es fácil apretar el producto de al lado. Se le da un
+   alto y un ancho touch de verdad. */
+.btn-quitar-item {
+    min-width: 48px;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radio-chico);
+    font-size: 1.1rem;
+}
+
+/* Lo mismo para los botones chicos de las tablas: nunca por
+   debajo de 44px de alto, que es el mínimo recomendado para el
+   dedo. */
+@media (pointer: coarse) {
+    .tabla .btn-sm {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ================================================================
+   GRILLA DE PRODUCTOS (para cargar el pedido)
+   Cada producto es un botón con su cantidad +/-.
+   ================================================================ */
+
+.grilla-productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.6rem;
+}
+
+.producto-boton {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--blanco);
+    border: 2px solid var(--borde);
+    border-radius: var(--radio-chico);
+    padding: 0.6rem;
+    margin: 0;
+    align-items: stretch;
+}
+
+.producto-boton-cuerpo {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.producto-nombre {
+    font-weight: 700;
+    color: var(--texto);
+    line-height: 1.2;
+}
+
+.producto-precio {
+    color: var(--verde-oscuro);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.producto-stock {
+    font-size: 0.75rem;
+}
+
+.producto-stock-ok {
+    color: var(--texto-suave);
+}
+
+/* Sin stock: se ve pero se avisa */
+.producto-agotado {
+    border-color: #A33A3A;
+    background-color: #FFF5F5;
+}
+
+/* Cantidad +/- */
+.producto-boton-cantidad {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex: 0 0 auto;
+}
+
+.btn-suma,
+.btn-resta {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--verde-oscuro);
+    background-color: var(--verde-claro);
+    color: var(--texto-sobre-verde);
+    font-size: 1.3rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.btn-suma:hover,
+.btn-resta:hover {
+    background-color: var(--verde-medio);
+}
+
+.producto-cantidad {
+    width: 52px;
+    height: 48px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: 2px solid var(--borde);
+    border-radius: var(--radio-chico);
+    color: var(--texto);
+    -moz-appearance: textfield;
+}
+
+.producto-cantidad::-webkit-outer-spin-button,
+.producto-cantidad::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* En pantallas chicas los productos van a una sola columna,
+   que es más cómodo de tocar que dos angostos. */
+@media (max-width: 575.98px) {
+    .grilla-productos {
+        grid-template-columns: 1fr;
+    }
+
+    .grilla-mesas {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .mesa {
+        min-height: 112px;
+        padding: 0.6rem 0.4rem;
+    }
+
+    .mesa-numero {
+        font-size: 1.7rem;
+    }
+
+    .numero-opcion span {
+        width: 46px;
+        height: 46px;
+        font-size: 1.05rem;
+    }
+}
+
+/* ================================================================
    UTILIDADES
    ================================================================ */
 

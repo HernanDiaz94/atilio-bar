@@ -25,16 +25,22 @@ que ya tiene datos.
 
 ---
 
-## Actualizar a la Etapa 2 (o a las siguientes)
+## Actualizar de etapa (Etapa 2, 3 y las siguientes)
 
 Cada etapa trae su propio archivo SQL. Se importa por phpMyAdmin
 sobre la base que ya tiene datos, sin tocar las tablas anteriores.
 
 1. Subí los archivos nuevos o modificados por FTP.
-2. phpMyAdmin → tu base → **Importar** → `sql/etapa2.sql` → **Ejecutar**.
-3. Entrá al panel y revisá **Productos**.
+2. phpMyAdmin → tu base → **Importar** → `sql/etapaN.sql` → **Ejecutar**.
+3. Entrá al panel y revisá lo nuevo.
 
-`etapa2.sql` es seguro de correr más de una vez: los `CREATE TABLE`
+| Etapa  | Archivo             | Qué aparece                        |
+|-------:|---------------------|------------------------------------|
+| 1      | (por `install.php`) | Usuarios, sesiones y configuración |
+| 2      | `sql/etapa2.sql`    | Carta de productos y stock         |
+| 3      | `sql/etapa3.sql`    | Mesas, pedidos y reservas          |
+
+Cada migración es segura de correr más de una vez: los `CREATE TABLE`
 usan `IF NOT EXISTS` y los datos iniciales se insertan solo si no
 existen.
 
@@ -88,6 +94,7 @@ AtilioBar/
 │   ├── csrf.php              Protección CSRF
 │   ├── helpers.php           Formato de dinero, fechas, validación
 │   ├── stock.php             Servicio de stock (Etapa 2)
+│   ├── mesas.php             Mesas, comandas y reservas (Etapa 3)
 │   ├── auditoria.php         Registro de acciones
 │   ├── router.php            Mapa de rutas y control de acceso
 │   ├── header.php / footer.php    Layout base
@@ -98,6 +105,7 @@ AtilioBar/
 │   ├── usuarios/             ABM de usuarios (solo admin)
 │   ├── productos/            Carta, categorías (Etapa 2)
 │   ├── stock/                Historial, ajustes y compras (Etapa 2)
+│   ├── mesas/                Grilla, pedidos, reservas (Etapa 3)
 │   └── auth/salir.php        Cierre de sesión
 │
 ├── assets/
@@ -107,7 +115,8 @@ AtilioBar/
 │
 ├── sql/
 │   ├── database.sql          Esquema de la Etapa 1
-│   └── etapa2.sql            Migración de la Etapa 2
+│   ├── etapa2.sql            Migración de la Etapa 2
+│   └── etapa3.sql            Migración de la Etapa 3
 └── logs/                     Errores de PHP (no se versiona)
 ```
 
@@ -149,7 +158,9 @@ preparación con receta: al venderlo resta del stock de los insumos.
    costo con promedio ponderado.
 2. **Ajuste.** El conteo físico no da. Corrige el número, con
    motivo obligatorio. No toca el costo.
-3. **Venta.** Se descuenta al cobrar (Etapa 4).
+3. **Venta.** Se descuenta al cargar el producto en la mesa (Etapa 3)
+   y, si se anula la línea, se repone. El cobro no toca el stock:
+   ya salió del depósito cuando lo serviste.
 
 Todo cambio pasa por `Stock::aplicar()`, que a la vez actualiza el
 producto y escribe en `stock_movimientos`. Por eso el stock actual
@@ -170,6 +181,52 @@ interpreta bien:
 `1.800` son mil ochocientos y `1.80` es un peso con ochenta
 centavos: la diferencia la hace la cantidad de dígitos después del
 punto.
+
+---
+
+## Mesas y pedidos (Etapa 3)
+
+La grilla de mesas es la pantalla principal. Cada mesa es un botón
+grande, con el número enorme y el estado escrito al lado del color:
+libre, ocupada, por cobrar o reservada. Nunca hay que adivinar por
+el color.
+
+### El estado de la mesa se calcula, no se guarda
+
+No hay una tabla de estados. El estado sale de las comandas abiertas
+y de las reservas del día. Si hubiera una tabla aparte, cualquier
+camino que se olvide de actualizarla dejaría la pantalla mintiendo.
+Calculándolo no hay forma de que se desincronice.
+
+Si una mesa está ocupada y además tiene reserva más tarde, se
+muestra **ocupada**: la reserva aparece recién cuando la mesa se
+libera.
+
+### El pedido se congela cuando piden la cuenta
+
+`abierta` → `por_cobrar` → (Etapa 4) `cerrada`.
+
+Al pedir la cuenta el pedido queda congelado: no se le pueden agregar
+productos ni cambiar cantidades. Si igual falta algo, el botón
+**Reabrir** lo vuelve a abrir y queda asentado quién y por qué.
+
+### El stock sale cuando se carga, no cuando se cobra
+
+Cada línea guarda, producto por producto, cuánto del depósito
+consumió por unidad (tabla `comanda_item_stock`). Eso permite que:
+
+- anular la línea devuelva **exactamente** lo que salió, incluso si
+  el mozo cambió la cantidad a 5 y después a 2;
+- un combo devuelva el gin y la tónica por separado;
+- si mañana cambian la receta del combo, la reposición siga
+  devolviendo lo que realmente se sacó ese día.
+
+Anular una línea **no la borra**: queda marcada como anulada con su
+motivo. Por eso se puede ver después qué se pidió, qué se sacó y
+quién lo hizo.
+
+Una mesa con historial no se borra nunca, se da de baja: así los
+informes viejos siguen cuadrando.
 
 ---
 

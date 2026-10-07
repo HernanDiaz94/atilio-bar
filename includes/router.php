@@ -247,6 +247,166 @@ function rutas_app(): array
             'grupo'       => 'gestion',
             'ocultar'     => 'es_admin',
         ],
+
+        // ---------- Mesas y comandas (Etapa 3) ----------
+        // La grilla la ven los dos: es la pantalla principal del
+        // bar. Abrir mesa, agregar productos y pedir la cuenta es
+        // tarea del vendedor.
+        'mesas' => [
+            'controlador' => 'mesas/index.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Mesas',
+            'icono'       => 'bi-grid-3x3-gap-fill',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        'mesas/ver' => [
+            'controlador' => 'mesas/ver.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Ver pedido',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Abrir mesa
+        'mesas/abrir' => [
+            'controlador' => 'mesas/abrir.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Abrir mesa',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Agregar producto al pedido
+        'mesas/agregar-producto' => [
+            'controlador' => 'mesas/agregar_producto.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Agregar producto',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Anular un producto del pedido
+        'mesas/anular-producto' => [
+            'controlador' => 'mesas/anular_producto.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Anular producto',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Cambiar la cantidad de un producto del pedido
+        'mesas/cambiar-cantidad' => [
+            'controlador' => 'mesas/cambiar_cantidad.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Cambiar cantidad',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        'mesas/por-cobrar' => [
+            'controlador' => 'mesas/por_cobrar.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Pedir la cuenta',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Volver a abrir un pedido que ya habia pedido la cuenta.
+        // Los dos roles: en un bar pasa seguido que el cliente
+        // pide la cuenta y despues se agrega algo mas.
+        'mesas/reabrir' => [
+            'controlador' => 'mesas/reabrir.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Reabrir pedido',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        'mesas/mover' => [
+            'controlador' => 'mesas/mover.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Mover de mesa',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Anular una mesa (dar de baja el pedido sin cobrar):
+        // SOLO ADMINISTRADOR, porque repone todo el stock.
+        'mesas/anular' => [
+            'controlador' => 'mesas/anular.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Anular mesa',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => 'es_admin',
+        ],
+
+        // ---------- Configuración de mesas (solo admin) ----------
+        'mesas/administrar' => [
+            'controlador' => 'mesas/administrar.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Administrar mesas',
+            'icono'       => 'bi-gear-fill',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'mesas/guardar-mesa' => [
+            'controlador' => 'mesas/guardar_mesa.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Guardar mesa',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'mesas/acciones-mesa' => [
+            'controlador' => 'mesas/acciones_mesa.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Acciones de mesa',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        // ---------- Reservas (Etapa 3) ----------
+        // Las ve el vendedor: tiene que saber quién llega a las 22.
+        'reservas' => [
+            'controlador' => 'mesas/reservas.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Reservas',
+            'icono'       => 'bi-bookmark-fill',
+            'grupo'       => 'gestion',
+            'ocultar'     => null,
+        ],
+
+        'reservas/guardar' => [
+            'controlador' => 'mesas/reserva_guardar.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Guardar reserva',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => null,
+        ],
+
+        'reservas/acciones' => [
+            'controlador' => 'mesas/reserva_acciones.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Acciones de reserva',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => null,
+        ],
     ];
 }
 

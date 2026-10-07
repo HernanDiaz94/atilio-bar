@@ -556,6 +556,28 @@ function icono_estado(string $estado): string
 }
 
 /**
+ * Convierte un estado interno en algo que se pueda usar como
+ * clase de CSS.
+ *
+ * El estado en la base es "por_cobrar" (con guion bajo, porque así
+ * lo usan los ENUM y el PHP), pero en la hoja de estilos las
+ * clases llevan guiones: .mesa-por-cobrar. Sin esta traducción, la
+ * mesa "por cobrar" saldría sin ningún color y nadie entendería por
+ * qué.
+ */
+function slug_estado(string $estado): string
+{
+    $slug = str_replace('_', '-', strtolower(trim($estado)));
+
+    // Solo se deja pasar lo que podría ser un nombre de clase:
+    // letras, números y guiones. Así el valor no puede inyectar
+    // atributos ni romper el HTML.
+    $slug = preg_replace('/[^a-z0-9-]/', '', $slug) ?? '';
+
+    return $slug !== '' ? $slug : 'neutra';
+}
+
+/**
  * Devuelve el nombre de la clase de rol, para pintar el badge.
  */
 function clase_rol(string $rol): string
