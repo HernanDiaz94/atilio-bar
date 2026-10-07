@@ -528,6 +528,91 @@ textarea:focus-visible {
     border-color: var(--borde);
 }
 
+/* ================================================================
+   STOCK (Etapa 2)
+   ------------------------------------------------------------
+   Cada estado de stock lleva texto e ícono además del color, para
+   que se lea sin depender del tono. Ver helpers.php:
+   clase_stock(), texto_stock().
+   ================================================================ */
+
+.stock-ok,
+.stock-bajo,
+.stock-cero,
+.stock-negativo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 2px solid transparent;
+    white-space: nowrap;
+}
+
+.stock-ok {
+    background-color: var(--estado-libre-fondo);
+    color: var(--estado-libre-texto);
+    border-color: #6E9E63;
+}
+
+.stock-bajo {
+    background-color: var(--estado-ocupada-fondo);
+    color: var(--estado-ocupada-texto);
+    border-color: #B08A00;
+}
+
+.stock-cero {
+    background-color: var(--estado-por-cobrar-fondo);
+    color: var(--estado-por-cobrar-texto);
+    border-color: #A33A3A;
+}
+
+.stock-negativo {
+    background-color: #E2E2E2;
+    color: #4A4A4A;
+    border-color: #6E6E6E;
+}
+
+/* ================================================================
+   MARGENES
+   El margen en verde o rojo. Acompañado del número y del
+   porcentaje, para que no dependa solo del color.
+   ================================================================ */
+
+.texto-ganancia {
+    color: #2F6B2F;
+    font-weight: 700;
+}
+
+.texto-perdida {
+    color: #8A1B1B;
+    font-weight: 700;
+}
+
+/* ================================================================
+   PRODUCTOS
+   ================================================================ */
+
+/* Producto desactivado: se ve atenuado sin desaparecer del todo,
+   porque sigue llevando historial. */
+.producto-inactivo td {
+    opacity: 0.6;
+}
+
+/* En la ficha del producto: bloques que se muestran y ocultan
+   según el tipo de producto elegido (con stock o preparación). */
+.oculto {
+    display: none !important;
+}
+
+/* Las filas de insumos de la receta */
+.fila-componente .form-control,
+.fila-componente .form-select {
+    min-height: 48px;
+}
+
 /* Punto de estado para tablas densas: color + texto al lado */
 .punto-estado {
     display: inline-block;

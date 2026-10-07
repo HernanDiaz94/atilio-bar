@@ -111,6 +111,142 @@ function rutas_app(): array
             'grupo'       => 'principal',
             'ocultar'     => null,
         ],
+
+        // ---------- Productos (Etapa 2) ----------
+        // El vendedor PUEDE ver la carta: necesita conocer los
+        // productos y sus precios para atender. Lo que no puede es
+        // modificarla, ver costos ni tocar el stock.
+        'productos' => [
+            'controlador' => 'productos/index.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Productos',
+            'icono'       => 'bi-cup-straw',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
+        // Solo administradores: la pantalla trae los formularios de
+        // alta y desactivación. El vendedor ya ve la categoría de
+        // cada producto en la carta, así que no pierde nada.
+        'categorias' => [
+            'controlador' => 'productos/categorias.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Categorías',
+            'icono'       => 'bi-tags-fill',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'productos/formulario' => [
+            'controlador' => 'productos/formulario.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Editar producto',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'productos/guardar' => [
+            'controlador' => 'productos/guardar.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Guardar producto',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'productos/acciones' => [
+            'controlador' => 'productos/acciones.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Acciones de producto',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'categorias/guardar' => [
+            'controlador' => 'productos/categoria_guardar.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Guardar categoría',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'categorias/acciones' => [
+            'controlador' => 'productos/categoria_acciones.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Acciones de categoría',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        // ---------- Stock (Etapa 2) ----------
+        // El historial es lectura para los dos: sirve para entender
+        // por qué cambió un número. Ajustar stock no.
+        'stock' => [
+            'controlador' => 'stock/historial.php',
+            'permiso'     => 'vendedor',
+            'titulo'      => 'Stock',
+            'icono'       => 'bi-box-seam-fill',
+            'grupo'       => 'gestion',
+            'ocultar'     => null,
+        ],
+
+        'stock/ajuste' => [
+            'controlador' => 'stock/ajuste.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Ajuste de stock',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'stock/ajuste-guardar' => [
+            'controlador' => 'stock/ajuste_guardar.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Guardar ajuste',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'compras' => [
+            'controlador' => 'stock/compras.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Compras',
+            'icono'       => 'bi-truck',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'compras/nueva' => [
+            'controlador' => 'stock/compra_nueva.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Nueva compra',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'compras/guardar' => [
+            'controlador' => 'stock/compra_guardar.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Guardar compra',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'compras/ver' => [
+            'controlador' => 'stock/compra_ver.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Ver compra',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
     ];
 }
 

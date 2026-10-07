@@ -17,16 +17,101 @@ $subtitulo  = $esAdmin
     : 'Resumen de tu turno';
 
 // Botones de la cabecera, distintos según el rol.
-$accionesCabecera = '<a href="' . e(url('mi-cuenta')) . '" class="btn btn-atilio-amarillo">'
-    . '<i class="bi bi-key-fill"></i> Mi contraseña</a>';
+$accionesCabecera = '<a href="' . e(url('productos')) . '" class="btn btn-atilio-amarillo">'
+    . '<i class="bi bi-cup-straw"></i> Carta</a>';
 
 if ($esAdmin) {
-    $accionesCabecera .= ' <a href="' . e(url('usuarios')) . '" class="btn btn-atilio-oscuro">'
-        . '<i class="bi bi-people-fill"></i> Gestionar usuarios</a>';
+    $accionesCabecera .= ' <a href="' . e(url('compras/nueva')) . '" class="btn btn-atilio-oscuro">'
+        . '<i class="bi bi-truck"></i> Cargar compra</a>';
+} else {
+    $accionesCabecera .= ' <a href="' . e(url('mi-cuenta')) . '" class="btn btn-atilio-amarillo">'
+        . '<i class="bi bi-key-fill"></i> Mi contraseña</a>';
 }
 
 require APP_ROOT . '/includes/header.php';
 ?>
+
+<!-- ================= ALERTAS DE STOCK ================= -->
+<!-- Van antes del resumen: si hay algo para reponer, es lo
+     primero que hay que ver al abrir el sistema.
+
+     Le interesa a los dos roles: al administrador para reponer, al
+     vendedor para saber qué no se puede ofrecer. Lo que cambia es
+     que el vendedor no ve la columna de acciones. -->
+<?php if (!empty($stockBajo)): ?>
+        <div class="tarjeta mb-3 <?= ((int) $stockNegativo > 0) ? '' : 'tarjeta-destacada' ?>">
+            <div class="tarjeta-cabecera">
+                <span>
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Hay que reponer stock
+                </span>
+                <span class="small"><?= e((string) count($stockBajo)) ?></span>
+            </div>
+            <div class="tabla-envoltura">
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th class="text-end">Stock</th>
+                            <th class="text-end">Mínimo</th>
+                            <?php if ($esAdmin): ?>
+                                <th class="text-end">Acciones</th>
+                            <?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($stockBajo as $p): ?>
+                            <?php
+                            $stock = (float) $p['stock_actual'];
+                            $minimo = (float) $p['stock_minimo'];
+                            ?>
+                            <tr>
+                                <td>
+                                    <strong><?= e((string) $p['nombre']) ?></strong>
+                                    <?php if ($stock < 0): ?>
+                                        <span class="stock-negativo">
+                                            <i class="bi bi-exclamation-octagon-fill"></i>
+                                            Hay que contar
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= e((string) $p['categoria']) ?></td>
+                                <td class="text-end">
+                                    <span class="<?= e(clase_stock($stock, $minimo, (string) $p['unidad'])) ?>">
+                                        <?= e(cantidad($stock)) ?>
+                                        <?= e((string) $p['unidad']) ?>
+                                    </span>
+                                </td>
+                                <td class="text-end"><?= e(cantidad($minimo)) ?></td>
+                                <?php if ($esAdmin): ?>
+                                    <td class="text-end">
+                                        <a href="<?= e(url('compras/nueva')) ?>"
+                                           class="btn btn-atilio-amarillo btn-sm">
+                                            <i class="bi bi-truck"></i>
+                                            <span class="d-none d-md-inline">Reponer</span>
+                                        </a>
+                                    </td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php elseif ($esAdmin): ?>
+    <div class="tarjeta tarjeta-destacada mb-3">
+        <div class="tarjeta-cuerpo centrado">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Todo el stock está por encima del mínimo.</strong>
+            <?php if ((int) $stockNegativo > 0): ?>
+                <span style="color: var(--texto-perdida);">
+                    Hay <?= e((string) $stockNegativo) ?> producto(s) en negativo: conviene contarlos.
+                </span>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
 
 <?php if ($esAdmin): ?>
 
@@ -86,11 +171,17 @@ require APP_ROOT . '/includes/header.php';
                 </div>
                 <div class="tarjeta-cuerpo">
                     <div class="d-grid gap-2">
-                        <a href="<?= e(url('usuarios')) ?>" class="btn btn-atilio">
-                            <i class="bi bi-people-fill"></i> Gestionar usuarios
+                        <a href="<?= e(url('productos')) ?>" class="btn btn-atilio">
+                            <i class="bi bi-cup-straw"></i> Carta de productos
                         </a>
-                        <a href="<?= e(url('usuarios/formulario')) ?>" class="btn btn-atilio-amarillo">
-                            <i class="bi bi-person-plus-fill"></i> Dar de alta un vendedor
+                        <a href="<?= e(url('compras/nueva')) ?>" class="btn btn-atilio-amarillo">
+                            <i class="bi bi-truck"></i> Cargar una compra
+                        </a>
+                        <a href="<?= e(url('stock')) ?>" class="btn btn-atilio-amarillo">
+                            <i class="bi bi-box-seam-fill"></i> Ver el stock
+                        </a>
+                        <a href="<?= e(url('usuarios')) ?>" class="btn btn-atilio-amarillo">
+                            <i class="bi bi-people-fill"></i> Gestionar usuarios
                         </a>
                         <a href="<?= e(url('mi-cuenta')) ?>" class="btn btn-atilio-amarillo">
                             <i class="bi bi-key-fill"></i> Cambiar mi contraseña
@@ -101,7 +192,6 @@ require APP_ROOT . '/includes/header.php';
 
                     <p class="mb-1 fw-bold">Próximas etapas</p>
                     <ul class="mb-0" style="color: var(--texto-suave);">
-                        <li><strong>Etapa 2:</strong> productos, precios y stock.</li>
                         <li><strong>Etapa 3:</strong> mesas y pedidos.</li>
                         <li><strong>Etapa 4:</strong> ventas, cobro y caja.</li>
                     </ul>
@@ -186,6 +276,12 @@ require APP_ROOT . '/includes/header.php';
                     </p>
 
                     <div class="d-grid gap-2">
+                        <a href="<?= e(url('productos')) ?>" class="btn btn-atilio">
+                            <i class="bi bi-cup-straw"></i> Ver la carta y los precios
+                        </a>
+                        <a href="<?= e(url('stock')) ?>" class="btn btn-atilio-amarillo">
+                            <i class="bi bi-box-seam-fill"></i> Consultar el stock
+                        </a>
                         <a href="<?= e(url('mi-cuenta')) ?>" class="btn btn-atilio-amarillo">
                             <i class="bi bi-key-fill"></i> Cambiar mi contraseña
                         </a>

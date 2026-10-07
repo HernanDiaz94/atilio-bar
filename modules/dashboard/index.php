@@ -52,6 +52,36 @@ if ($esAdmin) {
     );
 }
 
+// --- Alertas de stock (Etapa 2) ---------------------------------
+// Le interesan a los dos roles: al admin para reponer, al
+// vendedor para saber qué no se puede ofrecer.
+$stockBajo     = [];
+$stockCero     = 0;
+$stockNegativo = 0;
+
+if ($esAdmin) {
+    $limiteAlerta = (int) DB::valor(
+        "SELECT valor FROM configuracion WHERE clave = 'stock_alerta_dashboard'"
+    );
+    $limiteAlerta = ($limiteAlerta > 0) ? $limiteAlerta : 8;
+
+    $stockBajo     = Stock::stock_bajo($limiteAlerta);
+    $stockCero     = Stock::cantidad_stock_bajo();
+    $stockNegativo = Stock::cantidad_stock_negativo();
+} else {
+    // El vendedor ve solo una lista corta, sin costos.
+    $stockBajo = DB::all(
+        "SELECT p.id, p.nombre, p.stock_actual, p.stock_minimo, p.unidad,
+                c.nombre AS categoria
+         FROM productos p
+         INNER JOIN categorias c ON c.id = p.categoria_id
+         WHERE p.activo = 1 AND p.controla_stock = 1
+           AND p.stock_actual <= p.stock_minimo
+         ORDER BY (p.stock_actual - p.stock_minimo) ASC, p.nombre ASC
+         LIMIT 5"
+    );
+}
+
 // --- Datos comunes (los dos roles) -----------------------------
 $configuracion = DB::all('SELECT clave, valor FROM configuracion ORDER BY clave');
 

@@ -40,17 +40,33 @@ function e_json(mixed $valor): string
 
 /**
  * Arma una URL interna de la aplicación.
- *(url('usuarios') genera /atilio/index.php?r=usuarios)
  *
- * El prefijo se calcula solo a partir de APP_BASE_URL, así que la app
- * funciona igual en la raíz de htdocs o en una subcarpeta.
+ *   url('usuarios')                -> /atilio/index.php?r=usuarios
+ *   url('compras/ver&id=3')       -> /atilio/index.php?r=compras%2Fver&id=3
+ *
+ * Ojo con el segundo caso: lo que va después del & son parámetros
+ * de la URL, NO parte del nombre de la ruta. Si se codificara
+ * todo junto, el servidor buscaría una ruta llamada
+ * "compras/ver&id=3" y daría 404. Por eso se separa antes de
+ * codificar.
+ *
+ * @param string $ruta  Ruta del módulo, con parámetros opcionales
+ *                      separados por & o por ?
  */
 function url(string $ruta = ''): string
 {
     $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
+
     $ruta = ltrim($ruta, '/');
 
-    return $base . '/index.php?r=' . rawurlencode($ruta);
+    // Separar los parámetros de la ruta.
+    $separador = str_contains($ruta, '?') ? '?' : '&';
+    $partes    = explode($separador, $ruta, 2);
+
+    $nombreRuta = $partes[0];
+    $parametros = isset($partes[1]) ? $separador . $partes[1] : '';
+
+    return $base . '/index.php?r=' . rawurlencode($nombreRuta) . $parametros;
 }
 
 /** URL directa a un archivo físico (login.php, install.php...). */
@@ -398,21 +414,68 @@ function validar(array $datos, array $reglas): array
 }
 
 /**
- * Convierte un número escrito en formato argentino ("1.234,50") a float.
- * También acepta el formato con punto decimal ("1234.50").
+ * Convierte a float un número escrito en formato argentino.
+ *
+ * El problema real acá es que "1.800" es ambiguo: puede ser mil
+ * ochocientos (formato argentino, punto de miles) o uno punto ocho
+ * (formato inglés, punto decimal). Si se_choice mal, un precio de
+ * $1.800 se guarda como $1,80 y no te das cuenta hasta ver la
+ * cuenta.
+ *
+ * La regla que se aplica, para importes:
+ *
+ *   "1.800"     ->  1800    (punto + exactamente 3 dígitos: miles)
+ *   "1.80"      ->  1.80    (punto + 1 o 2 dígitos: decimal)
+ *   "1.8"       ->  1.8
+ *   "1.234,56"  ->  1234.56 (tiene coma: la coma es el decimal)
+ *   "1,50"      ->  1.50
+ *   "12.500"    ->  12500
+ *   "0.50"      ->  0.50
+ *
+ * En resumen: si hay coma, el punto es de miles. Si NO hay coma y
+ * hay punto, se mira cuántos dígitos hay después: si son 3, es de
+ * miles; si son 1 o 2, es decimal.
  */
 function a_numero(string $valor): float
 {
-    $valor = trim($valor);
+    $valor = trim(str_replace([' ', "\xc2\xa0"], '', $valor));
 
     if ($valor === '') {
         return 0.0;
     }
 
-    // Si tiene coma, se asume formato argentino: se sacan los puntos y la coma pasa a punto.
-    if (str_contains($valor, ',')) {
+    // Fuera el signo y cualquier cosa que no sea dígito, coma o punto.
+    $valor = preg_replace('/[^0-9.,\-]/', '', $valor) ?? '';
+
+    if ($valor === '' || $valor === '-') {
+        return 0.0;
+    }
+
+    $tieneComa = str_contains($valor, ',');
+    $tienePunto = str_contains($valor, '.');
+
+    if ($tieneComa && $tienePunto) {
+        // Formato argentino completo: 1.234,56
         $valor = str_replace('.', '', $valor);
         $valor = str_replace(',', '.', $valor);
+    } elseif ($tieneComa) {
+        // Solo coma: el decimal es la coma. 1,50 -> 1.50
+        $valor = str_replace(',', '.', $valor);
+    } elseif ($tienePunto) {
+        // Solo punto: hay que adivinar. Se mira la parte de atrás.
+        $partes = explode('.', $valor);
+        $decimales = strlen(end($partes));
+
+        // Más de un punto: el primero era de miles (1.234.567).
+        if (count($partes) > 2) {
+            $decimales = strlen(end($partes));
+            $valor = str_replace('.', '', $valor);
+        } elseif ($decimales === 3) {
+            // "1.800" -> miles. Pero ojo: si es solo el punto y
+            // los dígitos de adelante son 3, es un miles.
+            $valor = str_replace('.', '', $valor);
+        }
+        // Si son 1 o 2 dígitos, es decimal y se deja como está.
     }
 
     return (float) $valor;
@@ -504,6 +567,145 @@ function clase_rol(string $rol): string
 function texto_rol(string $rol): string
 {
     return $rol === 'administrador' ? 'Administrador' : 'Vendedor';
+}
+
+// ================================================================
+// STOCK
+// -----------------------------------------------------------------
+// El estado de un producto se muestra SIEMPRE con texto e ícono,
+// no solo con color: en un celular al sol, un verde y un rojo
+// parecidos no se distinguen.
+// ================================================================
+
+/**
+ * Clase CSS del badge según cómo esté el stock.
+ *
+ * @param float  $actual
+ * @param float  $minimo
+ * @param string $unidad
+ */
+function clase_stock(float $actual, float $minimo, string $unidad = 'unidad'): string
+{
+    if ($actual < 0) {
+        return 'stock-negativo';
+    }
+
+    if ($actual === 0.0) {
+        return 'stock-cero';
+    }
+
+    if ($minimo > 0 && $actual <= $minimo) {
+        return 'stock-bajo';
+    }
+
+    return 'stock-ok';
+}
+
+/**
+ * Texto del estado de stock.
+ */
+function texto_stock(float $actual, float $minimo, string $unidad = 'unidad'): string
+{
+    if ($actual < 0) {
+        return 'Negativo, hay que contar';
+    }
+
+    if ($actual === 0.0) {
+        return 'Sin stock';
+    }
+
+    if ($minimo > 0 && $actual <= $minimo) {
+        $plural = plural($unidad, $actual);
+        return 'Bajo (' . cantidad($actual) . ' ' . $plural . ')';
+    }
+
+    return cantidad($actual) . ' ' . plural($unidad, $actual);
+}
+
+/**
+ * Concuerda la unidad: 1 botella / 3 botellas.
+ */
+function plural(string $unidad, float $cantidad): string
+{
+    // Las unidades que ya son plurales (bidón, caja) no se tocan.
+    $yaPlurales = ['bidón', 'bidones', 'caja', 'cajas', 'docena', 'docenas'];
+
+    if (in_array(mb_strtolower($unidad), $yaPlurales, true)) {
+        return $unidad;
+    }
+
+    if ((float) $cantidad === 1.0) {
+        return $unidad;
+    }
+
+    // "unidad" -> "unidades", "botella" -> "botellas"
+    if (substr($unidad, -1) === 'a') {
+        return mb_substr($unidad, 0, -1) . 'as';
+    }
+
+    return $unidad . 's';
+}
+
+/**
+ * Lista de unidades para el desplegable de productos.
+ */
+function unidades_disponibles(): array
+{
+    return [
+        'unidad'   => 'Unidad',
+        'medida'   => 'Medida',
+        'botella'  => 'Botella',
+        'lata'     => 'Lata',
+        'litro'    => 'Litro',
+        'kg'       => 'Kilo',
+        'docena'   => 'Docena',
+        'caja'     => 'Caja',
+        'bidón'    => 'Bidón',
+        'paquete'  => 'Paquete',
+    ];
+}
+
+/**
+ * Texto del tipo de movimiento de stock.
+ */
+function texto_tipo_movimiento(string $tipo): string
+{
+    return match ($tipo) {
+        'alta_inicial'     => 'Alta',
+        'compra'           => 'Compra',
+        'ajuste'           => 'Ajuste',
+        'venta'            => 'Venta',
+        'anulacion_venta'  => 'Anulación',
+        'anulacion_item'   => 'Anulación',
+        'mesa_consumo'     => 'Consumo en mesa',
+        'devolucion'       => 'Devolución',
+        'baja'             => 'Baja',
+        default            => ucfirst($tipo),
+    };
+}
+
+/** Clase CSS según el tipo de movimiento (verde entra, rojo sale). */
+function clase_tipo_movimiento(string $tipo): string
+{
+    return match ($tipo) {
+        'compra', 'alta_inicial', 'devolucion' => 'mov-suma',
+        'ajuste'                                => 'mov-ajuste',
+        default                                => 'mov-resta',
+    };
+}
+
+/**
+ * El ícono del movimiento: + para lo que entra, - para lo que sale.
+ */
+function icono_tipo_movimiento(string $tipo): string
+{
+    return match ($tipo) {
+        'compra', 'alta_inicial' => '<i class="bi bi-plus-circle-fill"></i>',
+        'devolucion'            => '<i class="bi bi-arrow-counterclockwise"></i>',
+        'ajuste'                => '<i class="bi bi-sliders"></i>',
+        'baja'                  => '<i class="bi bi-dash-circle-fill"></i>',
+        default                 => '<i class="bi bi-dash-circle-fill"></i>',
+    };
 }
 
 /**

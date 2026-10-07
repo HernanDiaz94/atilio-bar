@@ -316,4 +316,389 @@
             return '';
         });
     });
+
+    // ========================================================
+    //  Compra: armar la lista de productos (Etapa 2)
+    // ========================================================
+
+    /**
+     * La compra se carga en una tabla que se arma en el navegador:
+     * se elige un producto, la cantidad y el costo, y se agrega.
+     *
+     * El total se calcula en el cliente, pero eso es solo para
+     * mostrarlo. El servidor vuelve a calcular todo: los valores que
+     * manda el navegador nunca se usan para calcular el total real.
+     */
+    function conectarFormularioCompra() {
+        var cuerpo = document.getElementById('cuerpoLineas');
+        var pie = document.getElementById('pieLineas');
+        var botonAgregar = document.getElementById('agregarLinea');
+        var botonGuardar = document.getElementById('botonGuardar');
+        var sinLineas = document.getElementById('sinLineas');
+        var aviso = document.getElementById('avisoLinea');
+        var selProducto = document.getElementById('nuevoProducto');
+        var inpCantidad = document.getElementById('nuevaCantidad');
+        var inpCosto = document.getElementById('nuevoCosto');
+
+        if (!cuerpo || !botonAgregar) {
+            return;
+        }
+
+        // Índice de líneas. Cada una guarda producto, cantidad y costo.
+        var lineas = [];
+
+        function datosProductos() {
+            var datos = window.ATILIO_COMPRA || { productos: [], lineas: [] };
+            return datos.productos || [];
+        }
+
+        function buscarProducto(id) {
+            var todos = datosProductos();
+
+            for (var i = 0; i < todos.length; i++) {
+                if (todos[i].id === id) {
+                    return todos[i];
+                }
+            }
+
+            return null;
+        }
+
+        /** "1.234,56" -> 1234.56 */
+        function aNumero(texto) {
+            if (typeof texto !== 'string') { return 0; }
+
+            texto = texto.trim().replace(/\./g, '').replace(',', '.');
+
+            var n = parseFloat(texto);
+
+            return isNaN(n) ? 0 : n;
+        }
+
+        /** 1234.56 -> "1.234,56" */
+        function formatear(n) {
+            return n.toLocaleString('es-AR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function pluralizar(unidad, cantidad) {
+            if (unidad === 'bidón' || unidad === 'bidones' ||
+                unidad === 'caja' || unidad === 'cajas' ||
+                unidad === 'docena' || unidad === 'docenas') {
+                return unidad;
+            }
+
+            if (cantidad === 1) { return unidad; }
+
+            if (unidad.slice(-1) === 'a') {
+                return unidad.slice(0, -1) + 'as';
+            }
+
+            return unidad + 's';
+        }
+
+        function pintar() {
+            cuerpo.innerHTML = '';
+
+            if (lineas.length === 0) {
+                if (sinLineas) { sinLineas.classList.remove('d-none'); }
+                if (pie) { pie.classList.add('d-none'); }
+                if (botonGuardar) { botonGuardar.disabled = true; }
+                return;
+            }
+
+            if (sinLineas) { sinLineas.classList.add('d-none'); }
+            if (pie) { pie.classList.remove('d-none'); }
+            if (botonGuardar) { botonGuardar.disabled = false; }
+
+            var total = 0;
+
+            lineas.forEach(function (linea, indice) {
+                var subtotal = linea.cantidad * linea.costo;
+                total += subtotal;
+
+                var fila = document.createElement('tr');
+
+                fila.innerHTML =
+                    '<td>' + escapar(linea.nombre) +
+                        '<br><small style="color:var(--texto-suave)">' +
+                        escapar(linea.categoria) + '</small></td>' +
+                    '<td class="text-end">' + escapar(String(linea.stock)) + '</td>' +
+                    '<td class="text-end">' + formatear(linea.cantidad) +
+                        ' <small>' + escapar(pluralizar(linea.unidad, linea.cantidad)) + '</small></td>' +
+                    '<td class="text-end">$ ' + formatear(linea.costo) + '</td>' +
+                    '<td class="text-end"><strong>$ ' + formatear(subtotal) + '</strong></td>' +
+                    '<td class="text-end">' +
+                    '<button type="button" class="btn btn-peligro btn-sm quitar-linea" data-indice="' + indice + '">' +
+                    '<i class="bi bi-x-lg"></i></button></td>';
+
+                // Los datos van en atributos hidden para que el
+                // servidor reciba lo que el usuario Splash ve.
+                fila.innerHTML +=
+                    '<input type="hidden" name="lineas[' + indice + '][producto_id]" value="' + linea.id + '">' +
+                    '<input type="hidden" name="lineas[' + indice + '][cantidad]" value="' + linea.cantidad + '">' +
+                    '<input type="hidden" name="lineas[' + indice + '][costo]" value="' + linea.costo + '">';
+
+                cuerpo.appendChild(fila);
+            });
+
+            var celdaTotal = document.getElementById('totalLineas');
+
+            if (celdaTotal) {
+                celdaTotal.textContent = '$ ' + formatear(total);
+            }
+        }
+
+        // Agregar una línea
+        botonAgregar.addEventListener('click', function () {
+            if (aviso) { aviso.classList.add('d-none'); }
+
+            var id = parseInt(selProducto.value, 10);
+
+            if (!id) {
+                avisar('Elegí un producto primero.', 'warning');
+                return;
+            }
+
+            var producto = buscarProducto(id);
+
+            if (!producto) { return; }
+
+            var cantidad = aNumero(inpCantidad.value);
+            var costo = aNumero(inpCosto.value);
+
+            if (cantidad <= 0) {
+                avisar('La cantidad tiene que ser mayor a cero.', 'warning');
+                return;
+            }
+
+            if (costo < 0) {
+                avisar('El costo no puede ser negativo.', 'warning');
+                return;
+            }
+
+            // El mismo producto dos veces se acumula en una sola línea.
+            var existente = null;
+
+            for (var i = 0; i < lineas.length; i++) {
+                if (lineas[i].id === id) {
+                    existente = lineas[i];
+                    break;
+                }
+            }
+
+            if (existente) {
+                existente.cantidad += cantidad;
+                // El costo se promedia ponderado para no perder el dato.
+                var totalCant = existente.cantidad;
+                var costoViejo = existente.costo;
+                existente.costo = aNumero(
+                    ((costoViejo * (totalCant - cantidad)) + (costo * cantidad)) / totalCant
+                );
+            } else {
+                lineas.push({
+                    id: id,
+                    nombre: producto.nombre,
+                    categoria: producto.categoria,
+                    unidad: producto.unidad,
+                    stock: producto.stock,
+                    cantidad: cantidad,
+                    costo: costo
+                });
+            }
+
+            pintar();
+
+            // Se limpia para cargar el siguiente
+            selProducto.value = '';
+            inpCantidad.value = '1';
+            inpCosto.value = '';
+            selProducto.focus();
+        });
+
+        // Enter en cualquier campo agrega la línea
+        [inpCantidad, inpCosto].forEach(function (campo) {
+            if (!campo) { return; }
+
+            campo.addEventListener('keydown', function (evento) {
+                if (evento.key === 'Enter') {
+                    evento.preventDefault();
+                    botonAgregar.click();
+                }
+            });
+        });
+
+        // Quitar una línea
+        cuerpo.addEventListener('click', function (evento) {
+            var boton = evento.target.closest('.quitar-linea');
+
+            if (!boton) { return; }
+
+            var indice = parseInt(boton.getAttribute('data-indice'), 10);
+
+            if (!isNaN(indice)) {
+                lineas.splice(indice, 1);
+                pintar();
+            }
+        });
+
+        // Si ya venía con líneas de un intento anterior, se pintan
+        var datos = window.ATILIO_COMPRA || {};
+
+        if (Array.isArray(datos.lineas) && datos.lineas.length > 0) {
+            datos.lineas.forEach(function (precargada) {
+                var producto = buscarProducto(parseInt(precargada.producto_id, 10));
+
+                if (!producto) { return; }
+
+                lineas.push({
+                    id: producto.id,
+                    nombre: producto.nombre,
+                    categoria: producto.categoria,
+                    unidad: producto.unidad,
+                    stock: producto.stock,
+                    cantidad: parseFloat(precargada.cantidad) || 0,
+                    costo: parseFloat(precargada.costo) || 0
+                });
+            });
+
+            pintar();
+        } else {
+            pintar();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        conectarFormularioCompra();
+    });
+
+    // ========================================================
+    //  Formulario de producto (Etapa 2)
+    // ========================================================
+
+    /**
+     * Muestra u oculta el bloque de stock según el tipo de producto
+     * elegido. Un trago no tiene sentido con un campo de stock.
+     */
+    function conectarTipoProducto() {
+        var bloqueStock = document.getElementById('bloqueStock');
+        var radioSi = document.getElementById('cs_si');
+        var radioNo = document.getElementById('cs_no');
+
+        if (!bloqueStock || !radioSi || !radioNo) {
+            return;
+        }
+
+        function aplicar() {
+            var llevaStock = radioSi.checked;
+
+            bloqueStock.classList.toggle('oculto', !llevaStock);
+
+            // Si no lleva stock, los campos se vacían para que no
+            // se manden valores que el servidor va a ignorar igual.
+            var actual = bloqueStock.querySelector('#stock_actual');
+            var minimo = bloqueStock.querySelector('#stock_minimo');
+
+            if (!llevaStock) {
+                if (actual) { actual.value = '0'; }
+                if (minimo) { minimo.value = '0'; }
+            }
+        }
+
+        radioSi.addEventListener('change', aplicar);
+        radioNo.addEventListener('change', aplicar);
+        aplicar();
+    }
+
+    /**
+     * Receta del combo: agrega y quita filas de insumos.
+     *
+     * Los insumos llegan en window.ATILIO_FORM_PRODUCTO, que el
+     * servidor arma con la lista completa. Así se agrega una fila
+     * sin recargar la página.
+     */
+    function conectarRecetaCombo() {
+        var checkbox = document.getElementById('es_combo');
+        var bloque = document.getElementById('bloqueReceta');
+        var lista = document.getElementById('listaComponentes');
+        var botonAgregar = document.getElementById('agregarComponente');
+
+        if (!checkbox || !bloque || !lista || !botonAgregar) {
+            return;
+        }
+
+        var datos = window.ATILIO_FORM_PRODUCTO || { candidatos: [] };
+        var candidatos = datos.candidatos || [];
+
+        function aplicar() {
+            bloque.classList.toggle('oculto', !checkbox.checked);
+        }
+
+        checkbox.addEventListener('change', aplicar);
+        aplicar();
+
+        // Quitar una fila
+        lista.addEventListener('click', function (evento) {
+            var boton = evento.target.closest('.quitar-componente');
+
+            if (!boton) {
+                return;
+            }
+
+            var fila = boton.closest('.fila-componente');
+
+            if (fila) {
+                fila.remove();
+            }
+        });
+
+        // Agregar una fila
+        botonAgregar.addEventListener('click', function () {
+            if (candidatos.length === 0) {
+                avisar('No hay insumos cargados para usar en un combo.', 'warning');
+                return;
+            }
+
+            var fila = document.createElement('div');
+            fila.className = 'input-group mb-2 fila-componente';
+
+            var opciones = candidatos.map(function (c) {
+                var elegido = (c.id === candidatos[0].id) ? ' selected' : '';
+                return '<option value="' + c.id + '"' + elegido + '>'
+                    + escapar(c.nombre) + '</option>';
+            }).join('');
+
+            fila.innerHTML =
+                '<span class="input-group-text"><i class="bi bi-box"></i></span>' +
+                '<select name="componentes[]" class="form-select componente-insumo" aria-label="Insumo">'
+                + opciones + '</select>' +
+                '<input type="text" name="componentes_cantidad[]" class="form-control componente-cantidad" ' +
+                'value="1,00" inputmode="decimal" aria-label="Cantidad a descontar">' +
+                '<button type="button" class="btn btn-peligro quitar-componente">' +
+                '<i class="bi bi-x-lg"></i></button>';
+
+            lista.appendChild(fila);
+        });
+    }
+
+    /**
+     * Escapa un texto para insertarlo con innerHTML.
+     *
+     * Los nombres de producto vienen del servidor, pero escapear
+     * igual: si alguien metiera un <b> en el nombre, no queremos
+     * que se ejecute.
+     */
+    function escapar(texto) {
+        var div = document.createElement('div');
+        div.textContent = texto === null || texto === undefined ? '' : String(texto);
+
+        return div.innerHTML;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        conectarTipoProducto();
+        conectarRecetaCombo();
+    });
 })();

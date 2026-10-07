@@ -130,6 +130,9 @@ require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/auditoria.php';
+// Servicio de stock (Etapa 2): el único punto por donde pasa un
+// cambio de existencias.
+require_once __DIR__ . '/stock.php';
 // El router cierra el arranque: es el que despacha a los módulos.
 require_once __DIR__ . '/router.php';
 

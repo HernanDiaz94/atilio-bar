@@ -250,3 +250,23 @@ Cada etapa trae su propio archivo SQL en `sql/` (por ejemplo
 
 Los archivos SQL son separados a propósito: así los aplicás sobre una
 base que ya tiene datos, sin romper lo que ya está cargado.
+
+Son seguros de correr más de una vez: los `CREATE TABLE` usan
+`IF NOT EXISTS` y los datos iniciales (categorías, productos de la
+carta) se insertan solo si no existen. Si los importás dos veces no
+se duplica nada.
+
+### Qué trae la Etapa 2
+
+Al importarla aparecen la carta del bar con productos de ejemplo
+(bebidas, tragos, pizza y empanadas) y cuatro categorías: Bebidas,
+Tragos, Comidas e Insumos.
+
+Los **precios** son de ejemplo: cambialos desde la pantalla de
+Productos. Los **costos** arrancan vacíos a propósito, porque son
+datos del negocio: se completan solos a medida que cargues compras.
+
+Para cambiar los datos de ejemplo antes de importar, editá los
+`INSERT` de `sql/etapa2.sql`. Si preferís empezar de cero, borrá las
+tablas `productos` y `categorias` desde phpMyAdmin después de
+importar, y armá la carta a mano.
