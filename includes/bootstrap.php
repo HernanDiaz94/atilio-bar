@@ -16,7 +16,76 @@
 // ------------------------------------------------------------
 // 1) Configuración
 // ------------------------------------------------------------
-require_once __DIR__ . '/../config/config.php';
+// config/config.php NO está en el repositorio de git: contiene la
+// contraseña de MySQL. En una máquina nueva hay que crearlo a
+// partir de la plantilla.
+//
+// Si falta, en vez de un error fatal de PHP le mostramos al usuario
+// qué hacer. Esta comprobación va antes de cargar nada, así que no
+// puede usar los helpers todavía: el HTML va escrito a mano.
+$rutaConfig = __DIR__ . '/../config/config.php';
+
+if (!is_file($rutaConfig)) {
+    http_response_code(500);
+    $rutaEjemplo = str_replace('\\', '/', dirname(__DIR__) . '/config/config.example.php');
+    ?>
+    <!DOCTYPE html>
+    <html lang="es-AR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Falta la configuración &middot; Atilio</title>
+        <style>
+            body { font-family: system-ui, sans-serif; background: #FFFADC; color: #2F4F2F;
+                   margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; }
+            .caja { max-width: 620px; background: #FFFFFF; border: 3px solid #8CC98A;
+                    border-radius: 16px; padding: 1.75rem; }
+            h1 { font-size: 1.4rem; margin: 0 0 1rem; }
+            pre { background: #F2F7EF; border: 2px solid #CFE3C6; border-radius: 8px;
+                  padding: 0.75rem; overflow-x: auto; font-size: 0.85rem; }
+            code { background: #F2F7EF; padding: 0.1rem 0.35rem; border-radius: 4px; }
+            .pasos { padding-left: 1.2rem; }
+            .pasos li { margin-bottom: 0.5rem; }
+        </style>
+    </head>
+    <body>
+        <div class="caja">
+            <h1>Falta el archivo de configuración</h1>
+
+            <p>
+                No se encontró <code>config/config.php</code>. No te preocupes:
+                es el archivo con los datos de conexión a la base de datos, y
+                está fuera del repositorio a propósito para que la contraseña
+                de MySQL no quede guardada en el historial de git.
+            </p>
+
+            <p>Se crea a partir de la plantilla en dos pasos:</p>
+
+            <ol class="pasos">
+                <li>
+                    Copiá <code>config/config.example.php</code> como
+                    <code>config/config.php</code>.<br>
+                    En Windows: <code>copy config\config.example.php config\config.php</code><br>
+                    En Linux/Mac: <code>cp config/config.example.php config/config.php</code>
+                </li>
+                <li>
+                    Abrí <code>config/config.php</code> y completá los datos de MySQL
+                    (<code>DB_HOST</code>, <code>DB_NAME</code>, <code>DB_USER</code> y
+                    <code>DB_PASS</code>).
+                </li>
+            </ol>
+
+            <p class="small">
+                La plantilla está en: <code><?= htmlspecialchars($rutaEjemplo, ENT_QUOTES) ?></code>
+            </p>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
+require_once $rutaConfig;
 
 // ------------------------------------------------------------
 // 2) Manejo de errores

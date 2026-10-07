@@ -18,31 +18,24 @@ logs/*.log
 # ------------------------------------------------------------
 # 2) CREDENCIALES
 # ------------------------------------------------------------
-#  OJO IMPORTANTE: config/config.php contiene la contraseña de
-#  MySQL del hosting. Hoy está con datos de ejemplo, pero cuando
-#  lo completes con los de ByetHost vas a estar por commitear
-#  una contraseña real.
+#  config/config.php tiene la contraseña de MySQL del hosting, así
+#  que NO se versiona. La exclusión es deliberada y permanente: por
+#  diseño, el repo no tiene el archivo con la contraseña.
 #
-#  El repo es privado, pero las contraseñas que se commitearon
-#  quedan para siempre en el historial: aunque después las borres,
-#  siguen ahí, accesibles con `git log -p`.
+#  Una contraseña que se commiteó queda en el historial para
+#  siempre. Borrarla del archivo después no la saca de ahí: sigue
+#  disponible con `git log -p`.
 #
-#  Cuando vas a poner los datos reales, sacá el archivo del
-#  seguimiento de git con ESTE comando (una sola vez):
+#  En tu máquina, config/config.php existe y lo editás normal. Para
+#  crearlo en una máquina nueva, partí de la plantilla que SÍ está
+#  versionada:
 #
-#      git update-index --skip-worktree config/config.php
+#      copy config\config.example.php config\config.php
 #
-#  A partir de ahí, podés editarlo y commitear todo lo demás sin
-#  que la contraseña entre nunca al historial.
-#
-#  Para volver a incluirlo (por ejemplo, para subir una mejora
-#  del archivo sin credenciales):
-#
-#      git update-index --no-skip-worktree config/config.php
-#
-#  Recordá que esto solo funciona en tu máquina. Si alguien más
-#  clona el repo, tiene que crear su propio config/config.php.
-#  Por eso la app muestra un mensaje claro si falta el archivo.
+#  Si alguna vez versionaste tu config.php con la contraseña real,
+#  sacalo del historial con git-filter-repo (o BFG). Avisame y te
+#  explico cómo, pero mejor no hacerlo nunca desde el principio.
+config/config.php
 
 
 # ------------------------------------------------------------

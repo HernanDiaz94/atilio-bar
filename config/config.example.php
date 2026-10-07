@@ -1,17 +1,21 @@
 <?php
 /**
- * config/config.php
+ * config/config.example.php
  * -----------------------------------------------------------------
- * ARCHIVO ÚNICO DE CONFIGURACIÓN DEL BAR "ATILIO"
+ * PLANTILLA de configuración. Copiala como config.php y completala
+ * con los datos de tu hosting.
  *
- * Este es el ÚNICO archivo que tenés que editar al subir la aplicación
- * al hosting. Todos los datos de conexión, los parámetros de seguridad
- * y la ruta de la aplicación viven acá.
+ * En una máquina nueva:
  *
- * IMPORTANTE PARA ByetHost:
- *   - El host de MySQL NO es "localhost" (es tipo sqlXXX.byethost.com).
- *   - El usuario y el nombre de la base llevan prefijo
- *     (ejemplo: b12_12345678_atilio).
+ *     copy config\config.example.php config\config.php
+ *
+ * El archivo config.php NO está en el repositorio de git, a
+ * propósito: contiene la contraseña de MySQL. Si estuviera
+ * versionado, esa contraseña quedaría escrita en el historial para
+ * siempre, incluso después de borrarla del archivo.
+ *
+ * Por eso existe esta plantilla: versionada, sin secretos, y dice
+ * exactamente qué va en cada campo.
  * -----------------------------------------------------------------
  */
 
@@ -20,7 +24,7 @@
 // ================================================================
 
 // Host del servidor MySQL.
-// ByetHost -> algo como: sql258.byethost.com
+// ByetHost -> algo como: sqlXXX.byethost.com
 // Local/XAMPP -> localhost
 define('DB_HOST', 'localhost');
 
@@ -57,7 +61,7 @@ define('APP_ENV', 'produccion');
 // Modo depuración. Tiene que ser false en el hosting.
 define('APP_DEBUG', false);
 
-// Zona horaria deArgentina
+// Zona horaria de Argentina
 define('APP_TIMEZONE', 'America/Argentina/Buenos_Aires');
 
 // Símbolo de moneda con el que se formatean los importes
