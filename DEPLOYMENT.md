@@ -258,9 +258,20 @@ se duplica nada.
 
 ### Qué trae la Etapa 2
 
-Al importarla aparecen la carta del bar con productos de ejemplo
-(bebidas, tragos, pizza y empanadas) y cuatro categorías: Bebidas,
-Tragos, Comidas e Insumos.
+Al importarla aparecen la carta del bar y cuatro categorías.
+
+La carta inicial es la que pidió el dueño:
+
+- **Bebidas:** vaso de fernet, vaso de gancia y vaso de vino, los
+  tres con control de stock.
+- **Comidas:** empanada de carne, de pollo y de humita. Se venden
+  de a una, por media docena y por docena, así que en el pedido
+  aparecen tres botones por empanada.
+- **Tragos** e **Insumos:** quedan vacías, listas para cuando
+  cargues tragos o combos con receta.
+
+Para cambiar la carta no hay que tocar el archivo: se hace desde
+**Productos**, que ya permite agregar, editar y dar de baja.
 
 Los **precios** son de ejemplo: cambialos desde la pantalla de
 Productos. Los **costos** arrancan vacíos a propósito, porque son
@@ -273,9 +284,13 @@ importar, y armá la carta a mano.
 
 ### Qué trae la Etapa 3
 
-Al importarla aparecen las tablas del bar: 8 del salón, 4 de la
-vereda y 3 de la barra. Y aparece la pantalla **Mesas**, que ya es
+Al importarla aparecen las **diez mesas** del bar: 5 del salón, 3 de
+la vereda y 2 de la barra. Y aparece la pantalla **Mesas**, que ya es
 la principal del sistema.
+
+El número de mesas NO es fijo: se cambia desde **Administrar mesas**,
+de a una o en tanda con "Generar mesas en tanda" (ponés de la 11 a la
+20 y se crean las diez).
 
 Las mesas de ejemplo se ajustan desde **Administrar mesas**
 (disponible solo para el administrador). Si querés empezar con las

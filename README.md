@@ -152,6 +152,28 @@ Hay dos tipos de producto, y se distinguen con `controla_stock`:
 Un combo (como un gin tonic que descuenta tónica y gin) es una
 preparación con receta: al venderlo resta del stock de los insumos.
 
+### Formas de venta: de a una, por media docena, por docena
+
+Además del precio, un producto puede declarar **en qué cantidades se
+vende**. Se escribe en el campo "Formas de venta":
+
+```
+1:Unidad,6:Media docena,12:Docena
+```
+
+En la pantalla del pedido aparece un botón por forma, con el importe
+ya calculado:
+
+```
+[Unidad]      [Media docena]   [Docena]
+ $ 900,00      $ 5.400,00      $ 10.800,00
+```
+
+El precio que se carga es el de **una** unidad y el sistema multiplica.
+Un producto sin formas de venta sigue usando el control de `+`/`-`
+de siempre, así que nada se rompe para el resto de la carta.
+preparación con receta: al venderlo resta del stock de los insumos.
+
 ### El stock se cambia por tres caminos, nunca a mano
 
 1. **Compras.** Entró mercadería comprada. Suma stock y actualiza el
@@ -190,6 +212,16 @@ La grilla de mesas es la pantalla principal. Cada mesa es un botón
 grande, con el número enorme y el estado escrito al lado del color:
 libre, ocupada, por cobrar o reservada. Nunca hay que adivinar por
 el color.
+
+Vienen diez mesas de ejemplo (cinco del salón, tres de la vereda y
+dos de la barra), pero el número se cambia desde **Administrar
+mesas**: de a una, o en tanda con "Generar mesas en tanda" poniendo
+el rango (de la 11 a la 20). Las mesas que ya existen no se pisan.
+
+El generador pide el rango y no la cantidad a propósito: las mesas
+de un bar tienen números que el mozo reconoce de memoria. Si el
+sistema inventara los números, el mozo terminaría diciendo "mesa
+tres" yendo a otra.
 
 ### El estado de la mesa se calcula, no se guarda
 
