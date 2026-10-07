@@ -1,0 +1,48 @@
+# ================================================================
+#  .gitattributes  ·  Bar "Atilio"
+# ------------------------------------------------------------------
+#  Controla cómo se guardan los finales de línea en el repositorio.
+#
+#  Por qué importa acá: el hosting corre Linux, y un archivo PHP
+#  guardado con finales de línea de Windows (CRLF) a veces hace
+#  que el servidor tire un encabezado "headers already sent" en un
+#  lugar inesperado, porque el CR se interpreta como un carácter.
+#
+#  Con este archivo, git guarda TODO con LF (Unix) en el
+#  repositorio. El CRLF de tu Windows no molesta: git lo traduce
+#  al guardar y al bajar.
+# ================================================================
+
+# Normalización de fin de línea para archivos de texto
+* text=auto eol=lf
+
+
+# ------------------------------------------------------------
+# Archivos que tienen que ser LF sí o sí
+# ------------------------------------------------------------
+*.php      text eol=lf
+*.css      text eol=lf
+*.js       text eol=lf
+*.svg      text eol=lf
+*.sql      text eol=lf
+*.md       text eol=lf
+*.htaccess text eol=lf
+.gitignore text eol=lf
+
+
+# ------------------------------------------------------------
+# Archivos que NO son texto: no se toca nada
+# ------------------------------------------------------------
+# Por ahora no hay imágenes ni fuentes, pero cuando las haya
+# (fotos de productos, por ejemplo) hay que desactivar la
+# normalización o git las va a corromper.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary

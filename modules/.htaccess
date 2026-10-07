@@ -1,0 +1,22 @@
+# ==================================================================
+#  modules/.htaccess
+# ------------------------------------------------------------------
+#  Los controladores y las vistas se cargan SIEMPRE desde index.php
+#  (o login.php), que es quien ya validó sesión, rol y CSRF.
+#
+#  Si alguien abre /modules/usuarios/acciones.php directamente por
+#  el navegador, se saltaría todas esas validaciones: por eso se
+#  bloquea el acceso por HTTP a toda la carpeta.
+#
+#  Esto NO afecta al include() de PHP: sigue funcionando igual.
+# ==================================================================
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
+Options -Indexes

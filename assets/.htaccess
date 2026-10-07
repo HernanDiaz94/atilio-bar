@@ -1,0 +1,27 @@
+# ==================================================================
+#  assets/.htaccess
+# ------------------------------------------------------------------
+#  CSS, JS, imágenes y el logo: sí se tienen que poder descargar,
+#  pero no queremos listar el contenido de las subcarpetas ni que
+#  se sirvan archivos sueltos que alguien pueda dejar por error.
+# ==================================================================
+
+Options -Indexes
+
+# El SVG se sirve como imagen (el favicon lo necesita así).
+<FilesMatch "\.(svg|png|jpg|jpeg|gif|webp|ico)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "public, max-age=604800"
+    </IfModule>
+</FilesMatch>
+
+# Fuentes, mapas y archivos de desarrollo: no hacen falta servirlos.
+<FilesMatch "\.(map|ts|scss|less|woff|woff2|eot|ttf)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

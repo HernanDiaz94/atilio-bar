@@ -1,0 +1,78 @@
+# ================================================================
+#  .gitignore  ·  Bar "Atilio"
+# ------------------------------------------------------------------
+#  Qué NO se versiona y por qué.
+# ================================================================
+
+
+# ------------------------------------------------------------
+# 1) LOGS DE ERRORES
+#    Acá PHP escribe el detalle de los errores: rutas de archivos,
+#    números de línea y a veces fragmentos de consultas.
+#    No sirve para nada más que para el servidor.
+# ------------------------------------------------------------
+logs/*.log
+*.log
+
+
+# ------------------------------------------------------------
+# 2) CREDENCIALES
+# ------------------------------------------------------------
+#  OJO IMPORTANTE: config/config.php contiene la contraseña de
+#  MySQL del hosting. Hoy está con datos de ejemplo, pero cuando
+#  lo completes con los de ByetHost vas a estar por commitear
+#  una contraseña real.
+#
+#  El repo es privado, pero las contraseñas que se commitearon
+#  quedan para siempre en el historial: aunque después las borres,
+#  siguen ahí, accesibles con `git log -p`.
+#
+#  Cuando vas a poner los datos reales, sacá el archivo del
+#  seguimiento de git con ESTE comando (una sola vez):
+#
+#      git update-index --skip-worktree config/config.php
+#
+#  A partir de ahí, podés editarlo y commitear todo lo demás sin
+#  que la contraseña entre nunca al historial.
+#
+#  Para volver a incluirlo (por ejemplo, para subir una mejora
+#  del archivo sin credenciales):
+#
+#      git update-index --no-skip-worktree config/config.php
+#
+#  Recordá que esto solo funciona en tu máquina. Si alguien más
+#  clona el repo, tiene que crear su propio config/config.php.
+#  Por eso la app muestra un mensaje claro si falta el archivo.
+
+
+# ------------------------------------------------------------
+# 3) SISTEMA OPERATIVO Y EDITORES
+# ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+desktop.ini
+.idea/
+.vscode/
+
+# Archivos temporales del editor
+*~
+
+# Backups y temporales de un editor
+*.swp
+*.swo
+*.orig
+*.old
+
+
+# ------------------------------------------------------------
+# 4) LO QUE SÍ SE VERSIONA
+# ------------------------------------------------------------
+#  Los .htaccess son configuración del servidor y hacen falta para
+#  que el despliegue funcione: sí van al repo.
+#  Los archivos .sql también: son el esquema de la base y cada
+#  etapa nueva trae el suyo.
+#
+#  Nota: no hace falta poner "!*.htaccess" ni "!sql/*.sql" porque
+#  acá no se ignoran con ningún patrón. Está anotado solo para que
+#  quede claro que son deliberados.

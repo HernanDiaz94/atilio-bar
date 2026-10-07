@@ -1,0 +1,880 @@
+/* ================================================================
+   assets/css/theme.css
+   -----------------------------------------------------------------
+   Tema visual del bar "Atilio".
+
+   TODA la paleta vive acá, en variables CSS. Si algún día querés
+   cambiar los colores, se cambian solo estas seis líneas y el resto
+   de la aplicación se actualiza.
+
+   La idea es amarillo claro + verde claro, con texto verde oscuro
+   para asegurar buen contraste de lectura en celulares a pleno sol.
+   ================================================================ */
+
+:root {
+    /* ---- Paleta ---- */
+    --amarillo-claro: #FFF4B8;   /* fondos de tarjetas destacadas, cerveza */
+    --amarillo-suave:  #FFFADC;   /* fondo general de la app */
+    --verde-claro:     #BFE3B4;   /* botones principales, navbar */
+    --verde-medio:      #8CC98A;   /* hover, acentos, bordes */
+    --texto:            #2F4F2F;   /* texto principal (verde oscuro) */
+
+    /* ---- Derivados (para no repetir colores sueltos) ---- */
+    --texto-suave:      #557055;   /* texto secundario: sigue teniendo buen contraste */
+    --texto-sobre-verde:#1E3A1E;   /* texto encima de los botones verdes */
+    --blanco:           #FFFFFF;
+    --verde-oscuro:     #2F4F2F;
+    --borde:            #CFE3C6;   /* bordes de tarjetas y tablas */
+    --sombra:           rgba(47, 79, 47, 0.12);
+
+    /* ---- Estados de mesa ---- */
+    /* Cada estado tiene su color Y su texto/ícono (ver helpers.php:
+         clase_estado(), texto_estado(), icono_estado()).
+         El color solo NO alcanza para distinguir estados. */
+    --estado-libre-fondo:       #E4F5DF;
+    --estado-libre-texto:       #2F4F2F;
+    --estado-ocupada-fondo:     #FFE9A8;
+    --estado-ocupada-texto:     #5C4A00;
+    --estado-reservada-fondo:   #CFE3F5;
+    --estado-reservada-texto:   #1F3D5C;
+    --estado-por-cobrar-fondo:  #FFC7C7;
+    --estado-por-cobrar-texto:  #7A1F1F;
+    --estado-anulada-fondo:     #E2E2E2;
+    --estado-anulada-texto:     #4A4A4A;
+
+    /* ---- Tamaños ---- */
+    --radio-borde: 12px;
+    --radio-chico: 8px;
+    --alto-boton: 48px;          /* alto mínimo para el dedo en pantalla táctil */
+}
+
+/* ================================================================
+   BASE
+   ================================================================ */
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    background-color: var(--amarillo-suave);
+    color: var(--texto);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Contraste: los textos de Bootstrap vienen grises claritos,
+   los forzamos al verde oscuro para que se lean siempre. */
+.text-muted {
+    color: var(--texto-suave) !important;
+}
+
+/* Foco visible para navegación con teclado: sin esto, usar la app
+   sin mouse (teclado o lector de pantalla) es casi imposible. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--verde-oscuro);
+    outline-offset: 2px;
+}
+
+/* ================================================================
+   NAVBAR
+   ================================================================ */
+
+.atilio-navbar {
+    background-color: var(--verde-claro);
+    border-bottom: 3px solid var(--verde-medio);
+    box-shadow: 0 2px 8px var(--sombra);
+}
+
+.atilio-navbar .navbar-brand,
+.atilio-navbar .nav-link {
+    color: var(--texto-sobre-verde);
+    font-weight: 600;
+}
+
+.atilio-navbar .nav-link {
+    border-radius: var(--radio-chico);
+    margin: 0 2px;
+    padding: 0.6rem 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.atilio-navbar .nav-link i {
+    font-size: 1.05rem;
+}
+
+.atilio-navbar .nav-link:hover {
+    background-color: var(--verde-medio);
+    color: var(--texto-sobre-verde);
+}
+
+/* Enlace activo: se marca con fondo, no solo con color */
+.atilio-navbar .nav-link.active {
+    background-color: var(--verde-oscuro);
+    color: var(--blanco);
+}
+
+.brand-texto {
+    font-size: 1.35rem;
+    line-height: 1;
+    color: var(--texto-sobre-verde);
+}
+
+.brand-sub {
+    font-size: 0.7rem;
+    font-weight: 400;
+    opacity: 0.75;
+    letter-spacing: 0.02em;
+}
+
+.logo-atilio {
+    display: block;
+    width: 40px;
+    height: 40px;
+}
+
+/* En el botón del usuario */
+.usuario-boton {
+    background-color: var(--blanco);
+    border: 2px solid var(--verde-oscuro);
+    color: var(--texto);
+    min-height: 42px;
+}
+
+.usuario-boton:hover {
+    background-color: var(--amarillo-claro);
+    color: var(--texto);
+}
+
+.usuario-menu .dropdown-menu {
+    border: 2px solid var(--verde-medio);
+    border-radius: var(--radio-borde);
+}
+
+/* ================================================================
+   CONTENIDO Y PIE
+   ================================================================ */
+
+.atilio-contenido {
+    flex: 1 0 auto;
+    padding: 1rem;
+    padding-bottom: 2rem;
+}
+
+.atilio-footer {
+    background-color: var(--verde-claro);
+    color: var(--texto-sobre-verde);
+    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+    border-top: 3px solid var(--verde-medio);
+}
+
+.atilio-footer .container-fluid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Encabezado de cada pantalla */
+.cabecera-pagina {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.titulo-pagina {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--texto);
+    margin: 0;
+}
+
+.subtitulo-pagina {
+    color: var(--texto-suave);
+    font-size: 0.92rem;
+}
+
+.acciones-cabecera {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ================================================================
+   TARJETAS
+   ================================================================ */
+
+.tarjeta {
+    background-color: var(--blanco);
+    border: 2px solid var(--borde);
+    border-radius: var(--radio-borde);
+    box-shadow: 0 2px 6px var(--sombra);
+}
+
+.tarjeta-cabecera {
+    background-color: var(--verde-claro);
+    color: var(--texto-sobre-verde);
+    font-weight: 700;
+    padding: 0.85rem 1rem;
+    border-radius: calc(var(--radio-borde) - 2px) calc(var(--radio-borde) - 2px) 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tarjeta-cuerpo {
+    padding: 1rem;
+}
+
+.tarjeta-destacada {
+    background-color: var(--amarillo-claro);
+    border-color: var(--verde-medio);
+}
+
+/* ================================================================
+   BOTONES (grandes para poder tocar con el dedo)
+   ================================================================ */
+
+.btn {
+    border-radius: var(--radio-chico);
+    font-weight: 600;
+    min-height: var(--alto-boton);
+    padding: 0.6rem 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+}
+
+.btn-sm {
+    min-height: 38px;
+    padding: 0.35rem 0.75rem;
+}
+
+/* Botón principal: verde claro. El texto va verde oscuro
+   porque sobre verde claro el blanco no tiene buen contraste. */
+.btn-atilio {
+    background-color: var(--verde-claro);
+    border: 2px solid var(--verde-oscuro);
+    color: var(--texto-sobre-verde);
+}
+
+.btn-atilio:hover,
+.btn-atilio:focus {
+    background-color: var(--verde-medio);
+    border-color: var(--verde-oscuro);
+    color: var(--texto-sobre-verde);
+}
+
+.btn-atilio:active {
+    background-color: var(--verde-oscuro);
+    color: var(--blanco);
+}
+
+/* Variante oscura para acciones importantes (guardar, confirmar) */
+.btn-atilio-oscuro {
+    background-color: var(--verde-oscuro);
+    border: 2px solid var(--verde-oscuro);
+    color: var(--blanco);
+}
+
+.btn-atilio-oscuro:hover,
+.btn-atilio-oscuro:focus {
+    background-color: #244024;
+    color: var(--blanco);
+}
+
+/* Variante amarilla para acciones secundarias */
+.btn-atilio-amarillo {
+    background-color: var(--amarillo-claro);
+    border: 2px solid var(--verde-oscuro);
+    color: var(--texto);
+}
+
+.btn-atilio-amarillo:hover,
+.btn-atilio-amarillo:focus {
+    background-color: #FFE98F;
+    color: var(--texto);
+}
+
+/* Botón de peligro (anular, desactivar) */
+.btn-peligro {
+    background-color: #FFFFFF;
+    border: 2px solid #A32020;
+    color: #8A1B1B;
+}
+
+.btn-peligro:hover,
+.btn-peligro:focus {
+    background-color: #A32020;
+    color: #FFFFFF;
+}
+
+/* En pantallas chicas los botones ocupan todo el ancho:
+   se apilan y quedan fáciles de apretar con el pulgar. */
+@media (max-width: 575.98px) {
+    .btn-ancho-completo {
+        width: 100%;
+    }
+}
+
+/* ================================================================
+   FORMULARIOS
+   ================================================================ */
+
+.form-label {
+    font-weight: 600;
+    color: var(--texto);
+    margin-bottom: 0.3rem;
+}
+
+.form-control,
+.form-select {
+    min-height: var(--alto-boton);
+    border: 2px solid var(--borde);
+    border-radius: var(--radio-chico);
+    font-size: 1rem; /* 16px evita que iOS haga zoom al enfocar */
+    color: var(--texto);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--verde-medio);
+    box-shadow: 0 0 0 0.25rem rgba(140, 201, 138, 0.35);
+}
+
+.form-control::placeholder {
+    color: #8A9A88;
+}
+
+.form-text {
+    color: var(--texto-suave);
+}
+
+/* Campo con error: se marca con borde rojo Y con mensaje abajo,
+   nunca solo con color. */
+.campo-error input,
+.campo-error select,
+.campo-error textarea {
+    border-color: #A32020;
+    background-color: #FFF5F5;
+}
+
+.campo-error label {
+    color: #8A1B1B;
+}
+
+.error-campo {
+    display: block;
+    color: #8A1B1B;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    font-weight: 600;
+}
+
+/* Rejilla de dos columnas en pantallas grandes */
+@media (min-width: 768px) {
+    .form-rejilla {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 1rem;
+    }
+
+    .form-rejilla .ancho-total {
+        grid-column: 1 / -1;
+    }
+}
+
+/* ================================================================
+   TABLAS
+   ================================================================ */
+
+.tabla-envoltura {
+    overflow-x: auto;   /* en celular la tabla se desliza en vez de romper el layout */
+    -webkit-overflow-scrolling: touch;
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--blanco);
+}
+
+.tabla thead th {
+    background-color: var(--verde-claro);
+    color: var(--texto-sobre-verde);
+    font-weight: 700;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.7rem 0.75rem;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--verde-medio);
+}
+
+.tabla tbody td {
+    padding: 0.7rem 0.75rem;
+    border-bottom: 1px solid var(--borde);
+    color: var(--texto);
+    vertical-align: middle;
+}
+
+.tabla tbody tr:nth-child(even) {
+    background-color: #FBFDFA;
+}
+
+.tabla tbody tr:hover {
+    background-color: var(--amarillo-claro);
+}
+
+.tabla tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ================================================================
+   BADGES: ROLES Y ESTADOS
+   ================================================================ */
+
+.rol-admin,
+.rol-vendedor {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 2px solid var(--verde-oscuro);
+    white-space: nowrap;
+}
+
+.rol-admin {
+    background-color: var(--verde-oscuro);
+    color: var(--blanco);
+}
+
+.rol-vendedor {
+    background-color: var(--amarillo-claro);
+    color: var(--texto);
+}
+
+/* Estados: cada uno tiene fondo, texto y (más adelante) ícono.
+   Ver helpers.php: clase_estado() / texto_estado() / icono_estado() */
+.estado-libre,
+.estado-ocupada,
+.estado-reservada,
+.estado-por-cobrar,
+.estado-anulada,
+.estado-neutra {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 2px solid transparent;
+    white-space: nowrap;
+}
+
+.estado-libre {
+    background-color: var(--estado-libre-fondo);
+    color: var(--estado-libre-texto);
+    border-color: #6E9E63;
+}
+
+.estado-ocupada {
+    background-color: var(--estado-ocupada-fondo);
+    color: var(--estado-ocupada-texto);
+    border-color: #B08A00;
+}
+
+.estado-reservada {
+    background-color: var(--estado-reservada-fondo);
+    color: var(--estado-reservada-texto);
+    border-color: #3E6E9E;
+}
+
+.estado-por-cobrar {
+    background-color: var(--estado-por-cobrar-fondo);
+    color: var(--estado-por-cobrar-texto);
+    border-color: #A33A3A;
+}
+
+.estado-anulada {
+    background-color: var(--estado-anulada-fondo);
+    color: var(--estado-anulada-texto);
+    border-color: #6E6E6E;
+}
+
+.estado-neutra {
+    background-color: var(--blanco);
+    color: var(--texto);
+    border-color: var(--borde);
+}
+
+/* Punto de estado para tablas densas: color + texto al lado */
+.punto-estado {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--verde-oscuro);
+    vertical-align: -1px;
+    margin-right: 0.35rem;
+}
+
+.punto-libre      { background-color: var(--estado-libre-fondo); }
+.punto-ocupada    { background-color: var(--estado-ocupada-fondo); }
+.punto-reservada  { background-color: var(--estado-reservada-fondo); }
+.punto-por-cobrar { background-color: var(--estado-por-cobrar-fondo); }
+
+/* ================================================================
+   TARJETAS DE RESUMEN (dashboard)
+   ================================================================ */
+
+.tarjeta-valor {
+    background-color: var(--blanco);
+    border: 2px solid var(--borde);
+    border-left: 8px solid var(--verde-medio);
+    border-radius: var(--radio-borde);
+    padding: 1rem;
+    height: 100%;
+}
+
+.tarjeta-valor .valor {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--texto);
+    line-height: 1.1;
+    margin: 0;
+}
+
+.tarjeta-valor .etiqueta {
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.tarjeta-valor .detalle {
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+}
+
+.tarjeta-valor.acento-amarillo {
+    background-color: var(--amarillo-claro);
+    border-left-color: #D9B400;
+}
+
+/* ================================================================
+   AVISOS (se usan en login y en las pantallas de error)
+   ================================================================ */
+
+.avisos {
+    margin-bottom: 1rem;
+}
+
+/* Avisos flotantes que genera assets/js/app.js.
+   Se posicionan arriba de todo y por encima de la navbar,
+   para que se vean aunque el usuario esté en el fondo de la página. */
+.avisos-flotantes {
+    position: fixed;
+    top: 76px;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    pointer-events: none;
+    padding: 0 1rem;
+}
+
+.avisos-flotantes .alert {
+    max-width: 640px;
+    margin: 0 auto 0.5rem;
+    box-shadow: 0 4px 12px var(--sombra);
+    transition: opacity 0.25s ease;
+    pointer-events: auto;
+}
+
+/* En pantallas chicas bajan un poco más para no tapar la navbar */
+@media (max-width: 575.98px) {
+    .avisos-flotantes {
+        top: 68px;
+        padding: 0 0.5rem;
+    }
+}
+
+.alert {
+    border-radius: var(--radio-borde);
+    border-width: 2px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: var(--estado-libre-fondo);
+    border-color: #6E9E63;
+    color: var(--estado-libre-texto);
+}
+
+.alert-danger {
+    background-color: var(--estado-por-cobrar-fondo);
+    border-color: #A33A3A;
+    color: var(--estado-por-cobrar-texto);
+}
+
+.alert-info {
+    background-color: var(--estado-reservada-fondo);
+    border-color: #3E6E9E;
+    color: var(--estado-reservada-texto);
+}
+
+.alert-warning {
+    background-color: var(--estado-ocupada-fondo);
+    border-color: #B08A00;
+    color: var(--estado-ocupada-texto);
+}
+
+/* Lista de movimientos (auditoría, historial) */
+.lista-movimientos {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lista-movimientos li {
+    padding: 0.6rem 0;
+    border-bottom: 1px dashed var(--borde);
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+}
+
+.lista-movimientos li:last-child {
+    border-bottom: none;
+}
+
+.lista-movimientos .momento {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    white-space: nowrap;
+}
+
+/* ================================================================
+   PANTALLAS DE ERROR (403 / 404 / 500)
+   ================================================================ */
+
+.pantalla-error {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.pantalla-error .codigo {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--verde-medio);
+    line-height: 1;
+    margin: 0;
+}
+
+.pantalla-error h1 {
+    font-size: 1.4rem;
+    margin: 0.5rem 0;
+    color: var(--texto);
+}
+
+.pantalla-error p {
+    color: var(--texto-suave);
+}
+
+/* ================================================================
+   PANTALLA DE LOGIN
+   ================================================================ */
+
+.login-fondo {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    /* Degradado suave con los colores del tema */
+    background:
+        radial-gradient(circle at 15% 15%, var(--amarillo-claro) 0%, transparent 55%),
+        radial-gradient(circle at 85% 85%, var(--verde-claro) 0%, transparent 55%),
+        var(--amarillo-suave);
+}
+
+.login-caja {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--blanco);
+    border: 3px solid var(--verde-medio);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px var(--sombra);
+    padding: 1.75rem;
+}
+
+.login-logo {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 0.5rem;
+}
+
+.login-titulo {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--texto);
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
+.login-subtitulo {
+    color: var(--texto-suave);
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+}
+
+.login-pie {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+    margin-top: 1.25rem;
+    border-top: 1px dashed var(--borde);
+    padding-top: 0.85rem;
+}
+
+/* Recordatorio visual del nombre del local bajo el login */
+.login-local {
+    background-color: var(--amarillo-claro);
+    border: 2px dashed var(--verde-medio);
+    border-radius: var(--radio-chico);
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--texto);
+    text-align: center;
+    margin-top: 1rem;
+}
+
+/* ================================================================
+   UTILIDADES
+   ================================================================ */
+
+.sin-borde-abajo { border-bottom: none !important; }
+.marco { border: 2px solid var(--borde); border-radius: var(--radio-borde); }
+.marco-amarillo { background-color: var(--amarillo-claro); border: 2px solid var(--verde-medio); border-radius: var(--radio-borde); }
+.mt-medio { margin-top: 0.75rem; }
+.mb-medio { margin-bottom: 0.75rem; }
+.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9rem;
+    background-color: #F2F7EF;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    word-break: break-all;
+}
+.centrado { text-align: center; }
+
+/* ================================================================
+   IMPRESIÓN (ticket de 80 mm, Etapa 4)
+   Se deja definido ahora para que el ticket nunca imprima
+   navbar, botones ni colores de fondo.
+   ================================================================ */
+
+@media print {
+    .atilio-navbar,
+    .atilio-footer,
+    .no-imprimir {
+        display: none !important;
+    }
+
+    body {
+        background: #FFFFFF;
+    }
+
+    @page {
+        size: 80mm auto;
+        margin: 4mm;
+    }
+}
+
+/* ================================================================
+   ACCESIBILIDAD
+   ------------------------------------------------------------
+   Respetar la preferencia de menos animación: algunos usuarios
+   (y gente con mareos) necesitan las transiciones apagadas.
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ================================================================
+   CELULARES Y TABLETAS
+   ------------------------------------------------------------
+   Ajustes finos que Bootstrap no cubre solo.
+   ================================================================ */
+
+@media (max-width: 575.98px) {
+    .atilio-contenido {
+        padding: 0.75rem;
+    }
+
+    .titulo-pagina {
+        font-size: 1.25rem;
+    }
+
+    .login-caja {
+        padding: 1.25rem;
+        border-radius: 16px;
+    }
+
+    .login-logo {
+        width: 72px;
+        height: 72px;
+    }
+
+    .login-titulo {
+        font-size: 1.6rem;
+    }
+
+    /* Las acciones de la cabecera se estiran a lo ancho */
+    .acciones-cabecera {
+        width: 100%;
+    }
+
+    .acciones-cabecera .btn {
+        flex: 1 1 auto;
+    }
+}
+
+/* En tablets la navbar puede mostrar todo en una línea */
+@media (min-width: 992px) {
+    .navbar-nav .nav-link {
+        padding: 0.6rem 1rem;
+    }
+}

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    assets/img/logo.svg
+
+    Logo de "Atilio": una jarra de cerveza con espuma y burbujas.
+
+    Está dibujado a mano en SVG (sin imágenes externas) para que se vea
+    nítido en cualquier tamaño: se usa en la navbar a 40px, en el login
+    a 96px y también como favicon del navegador.
+
+    Paleta (la misma del tema, en assets/css/theme.css):
+      amarillo-claro  #FFF4B8  la cerveza
+      amarillo-suave  #FFFADC  la espuma, más clara que la cerveza
+      verde-claro     #BFE3B4  detalles y acentos
+      verde-medio     #8CC98A  burbujas
+      texto           #2F4F2F  todos los contornos
+
+    Decisiones de diseño para que se lea bien en tamaños chicos:
+      Todo dentro del viewBox 0 0 64 64.
+      Contornos gruesos y parejos (stroke-width 3) en verde oscuro:
+        eso da contraste contra el amarillo claro en cualquier fondo.
+      La espuma son círculos separados y simples: evita las curvas raras
+        que en tamaños chicos se ven como manchas.
+      Burbujas redondas de tamaño decreciente: se distinguen a 16px.
+
+    OJO al editar: en XML un comentario NO puede contener dos guiones
+    seguidos ni terminar en guion. Por eso los separadores de abajo
+    usan signo igual en vez de guion.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64"
+     height="64"
+     role="img"
+     aria-labelledby="atilio-titulo atilio-desc">
+
+    <title id="atilio-titulo">Atilio</title>
+    <desc id="atilio-desc">Jarra de cerveza con espuma, logo del bar Atilio</desc>
+
+    <!--
+         1) ASA (va detrás del cuerpo de la jarra)
+    -->
+    <path d="M43 27 h5.5 a8.5 8.5 0 0 1 0 17 H43"
+          fill="none"
+          stroke="#2F4F2F"
+          stroke-width="4"
+          stroke-linecap="round"/>
+
+    <!--
+         2) CUERPO DE LA JARRA
+         Bordes ligeramente angostos hacia abajo, como una jarra real.
+    -->
+    <path d="M13 21 H43 V46 a7 7 0 0 1 -7 7 H20 a7 7 0 0 1 -7 -7 Z"
+          fill="#FFF4B8"
+          stroke="#2F4F2F"
+          stroke-width="3"
+          stroke-linejoin="round"/>
+
+    <!--
+         3) NIVEL DE LA CERVEZA
+         Una franja más clara arriba que representa la luz.
+    -->
+    <path d="M16 30 H40"
+          fill="none"
+          stroke="#FFFADC"
+          stroke-width="3"
+          stroke-linecap="round"/>
+
+    <!--
+         4) BURBUJAS DENTRO DE LA CERVEZA
+    -->
+    <circle cx="23" cy="37" r="3"   fill="#8CC98A"/>
+    <circle cx="32" cy="35" r="2"   fill="#8CC98A"/>
+    <circle cx="27" cy="45" r="2.4" fill="#8CC98A"/>
+    <circle cx="35" cy="44" r="1.6" fill="#BFE3B4"/>
+
+    <!--
+         5) ESPUMA
+         Tres lóbulos de distintas alturas: da la forma de la espuma
+         que sube por encima del borde de la jarra.
+    -->
+    <g fill="#FFFADC" stroke="#2F4F2F" stroke-width="3" stroke-linejoin="round">
+        <circle cx="19" cy="19" r="7"/>
+        <circle cx="29" cy="15" r="8"/>
+        <circle cx="39" cy="19" r="7"/>
+    </g>
+
+    <!--
+         Base de la jarra: franja verde que la apoya en la mesa
+    -->
+    <rect x="16" y="52" width="24" height="4" rx="2" fill="#8CC98A"/>
+</svg>

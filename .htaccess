@@ -1,0 +1,50 @@
+# ==================================================================
+#  .htaccess  ·  Bar "Atilio"  ·  raíz de la aplicación
+# ------------------------------------------------------------------
+#  Este archivo no hace el ruteo de la aplicación: eso lo hace
+#  index.php con el parámetro ?r=. Acá solo va seguridad.
+#
+#  Si el hosting no soporta .htaccess, la aplicación IGUAL
+#  funciona: lo único que se pierde es el bloqueo de carpetas.
+#  Por eso el instalador y los datos sensibles están además
+#  protegidos desde PHP.
+# ==================================================================
+
+# ------------------------------------------------------------------
+# 1) No listar el contenido de las carpetas
+#    Si alguien entra a /modules/ no ve la lista de archivos.
+# ------------------------------------------------------------------
+Options -Indexes
+
+# ------------------------------------------------------------------
+# 2) Página de inicio por defecto
+# ------------------------------------------------------------------
+DirectoryIndex index.php
+
+# ------------------------------------------------------------------
+# 3) Proteger archivos que no deben descargarse nunca
+#    .htaccess, .sql, .log, .md, .json, .ini, .yml, .xml
+# ------------------------------------------------------------------
+<FilesMatch "^(\.htaccess|\.htpasswd|.*\.(sql|log|md|json|ini|yml|yaml|xml|bak|old|orig|swp|dist|bak~))$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ------------------------------------------------------------------
+# 4) Sin listados de archivos en subcarpetas
+# ------------------------------------------------------------------
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# ------------------------------------------------------------------
+# 5) Ocultar la versión de PHP en los errores
+# ------------------------------------------------------------------
+<IfModule mod_php.c>
+    php_flag expose_php off
+</IfModule>
