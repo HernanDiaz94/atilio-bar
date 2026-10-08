@@ -157,7 +157,18 @@ CREATE TABLE IF NOT EXISTS `caja_movimientos` (
         FOREIGN KEY (`caja_id`) REFERENCES `cajas` (`id`)
         ON DELETE CASCADE ON UPDATE CASCADE,
 
-    CONSTRAINT `fk_mov_usuario`
+    -- El nombre es UNICO EN TODA LA BASE, no solo en esta tabla.
+    --
+    -- Antes esta restriccion se llamaba fk_mov_usuario, que ya usaba
+    -- stock_movimientos (etapa2). MariaDB 13 lo aceptaba duplicado y
+    -- el error no aparecia ni en las pruebas ni al importar en local,
+    -- pero el MySQL de ByetHost NO: cortaba la importacion con
+    -- "Error: 121 Duplicate key on write or update" al llegar a esta
+    -- tabla, y la base quedaba con 17 de las 22 tablas.
+    --
+    -- Por eso se llama fk_cajamov_usuario: es lo bastante distinto
+    -- como para no chocar con ninguna otra y dice de qué tabla es.
+    CONSTRAINT `fk_cajamov_usuario`
         FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
         ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
