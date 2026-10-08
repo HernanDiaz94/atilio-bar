@@ -2366,3 +2366,160 @@ textarea:focus-visible {
         flex-wrap: wrap;
     }
 }
+
+/* ==================================================================
+   HORARIOS Y PAGINA PUBLICA (Etapa 6)
+   ------------------------------------------------------------------
+   La pantalla de horarios se usa una vez cada tanto, pero cuando se
+   usa tiene que quedar bien a la primera: es el dato que despacha a
+   la gente a un bar abierto o cerrado.
+   ================================================================== */
+
+/* --- Como esta ahora, arriba de todo --- */
+.estado-barra {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: 1rem 1.1rem;
+    border: 3px solid;
+    border-radius: var(--radio);
+}
+
+.estado-barra .bi {
+    font-size: 2.2rem;
+    line-height: 1;
+}
+
+.estado-barra strong {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.estado-barra span {
+    display: block;
+    color: var(--texto-suave);
+}
+
+.estado-barra.estado-abierto {
+    background: #E4F5DE;
+    border-color: #5A8F4E;
+}
+
+.estado-barra.estado-abierto .bi {
+    color: #2F7A28;
+}
+
+.estado-barra.estado-cerrado {
+    background: #F1EEE4;
+    border-color: #8A8F7A;
+}
+
+.estado-barra.estado-cerrado .bi {
+    color: #6B6F5C;
+}
+
+/* --- La tabla del horario --- */
+.ayuda-horarios {
+    margin: 0 0 1rem;
+    padding: .8rem 1rem;
+    border-left: 4px solid var(--verde);
+    background: var(--verde-claro);
+    border-radius: 0 var(--radio) var(--radio) 0;
+    font-size: .9rem;
+    color: var(--texto);
+}
+
+.tabla-horarios th,
+.tabla-horarios td {
+    vertical-align: middle;
+}
+
+.tabla-horarios .dia-semana {
+    min-width: 8rem;
+    white-space: nowrap;
+}
+
+.tabla-horarios .centro {
+    text-align: center;
+}
+
+.tabla-horarios .form-control {
+    min-width: 7rem;
+    min-height: 2.9rem;
+}
+
+/* La casilla grande: se toca con el dedo y no hay que apuntarle */
+.casilla-grande {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    cursor: pointer;
+    font-size: .85rem;
+    user-select: none;
+}
+
+.casilla-grande .form-check-input {
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+}
+
+.tabla-horarios .resultado-dia {
+    font-size: .9rem;
+    color: var(--texto-suave);
+    white-space: nowrap;
+}
+
+.texto-vacio {
+    color: var(--texto-suave);
+    font-style: italic;
+}
+
+.acciones-formulario {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--borde);
+}
+
+/* --- Marcar un dia cerrado --- */
+.form-cierre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 2px dashed var(--borde);
+    border-radius: var(--radio);
+    background: #FAFAF4;
+}
+
+.form-cierre .campo-fecha {
+    flex: 0 1 11rem;
+}
+
+.form-cierre .campo-motivo {
+    flex: 1 1 14rem;
+}
+
+.form-cierre label {
+    display: block;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+    margin-bottom: .2rem;
+}
+
+.form-cierre .form-control {
+    min-height: 2.9rem;
+}
+
+.opcional {
+    font-weight: 400;
+    color: var(--texto-suave);
+}
+
+.form-sacar-cierre {
+    display: inline;
+}

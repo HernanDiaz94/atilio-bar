@@ -538,6 +538,55 @@ function rutas_app(): array
             'ocultar'     => 'es_admin',
         ],
 
+        // ---------- Horarios (solo admin) ----------
+        //
+        // El horario y los días cerrados los edita el dueño: es un
+        // dato que cambia pocas veces y hay que saber que quedó bien.
+        'horarios' => [
+            'controlador' => 'horarios/index.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Horarios',
+            'icono'       => 'bi-clock',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'horarios/guardar' => [
+            'controlador' => 'horarios/guardar.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Guardar horarios',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'horarios/cierre' => [
+            'controlador' => 'horarios/cierre.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Días cerrados',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        // ---------- Página pública (Etapa 6) ----------
+        //
+        // SIN SESIÓN. Es lo único del sistema que se abre sin
+        // identificarse: el horario y la carta, para que alguien que
+        // no tiene cuenta pueda ver si el bar está abierto.
+        //
+        // Conoce 'publico', que en Auth::requiere_rol() significa
+        // "no pidas sesión". No lleva icono a propósito: así no
+        // aparece en el menú del panel, que es para los del bar.
+        'publico' => [
+            'controlador' => 'publico/index.php',
+            'permiso'     => 'publico',
+            'titulo'      => 'Atilio Bar',
+            'icono'       => '',
+            'grupo'       => 'principal',
+            'ocultar'     => null,
+        ],
+
         'ventas/ver' => [
             'controlador' => 'ventas/ver.php',
             'permiso'     => 'administrador',
@@ -603,7 +652,12 @@ function router_resolver(): void
     // que GUARDA la contraseña nueva y la de logout. Si faltara
     // alguna, el usuario quedaría en un bucle de redirecciones
     // sin poder resolver nunca su propio problema.
-    $permitidasConClaveTemporal = ['mi-cuenta', 'mi-cuenta/guardar', 'salir'];
+    $permitidasConClaveTemporal = [
+        'mi-cuenta',
+        'mi-cuenta/guardar',
+        'salir',
+        'publico',          // No tiene nada que ver con claves: se puede mirar sin haberla cambiado.
+    ];
 
     $usuario = Auth::usuario();
 

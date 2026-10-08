@@ -354,3 +354,39 @@ de dejarte atendido un mesa sin poder cargar el pedido.
 
 Los reportes son **solo del administrador**.
 
+### Qué trae la Etapa 6
+
+Al importarla aparecen la pantalla **Horarios** y la **página pública**
+(`index.php?r=publico`), que es lo único que se abre sin iniciar
+sesión.
+
+Se importa como las demás: phpMyAdmin → tu base → **Importar** →
+`sql/etapa6.sql` → **Ejecutar**. Agrega dos tablas (`horarios` y
+`horarios_cierres`) y siete claves de configuración. **No toca ninguna
+tabla anterior.**
+
+**Importala antes de subir el resto.** Si los archivos PHP están
+arriba sin la migración, la aplicación abre con el aviso de "falta
+importar sql/etapa6.sql" en vez de romperse.
+
+La página pública se edita desde el mismo lugar:
+
+- el horario de cada día, con la casilla de "cierra al día siguiente"
+  para los horarios que pasan de la medianoche;
+- los días cerrados (feriados, vacaciones);
+- teléfono, dirección y un texto libre, en **Configuración** (grupo
+  `publico`).
+
+### Antes de terminar
+
+Verificá estos cuatro puntos con un ojo de clínico:
+
+1. **La página abre sin iniciar sesión.** Pegá el link en una ventana
+   de incógnito: tiene que mostrar el bar.
+2. **El horario dice bien la noche.** Si abres a las 20 y cerrás a las
+   2, tiene que decir "20:00 a 02:00 (día siguiente)".
+3. **La página no muestra costos.** Buscá el precio de compra de
+   algún producto: no tiene que aparecer.
+4. **El aviso de cambio de clave** de tu hosting tiene que dejarte
+   marcar el dominio en HTTPS, si no Google no lo va a priorizar.
+

@@ -50,7 +50,13 @@ $datos = Reportes::paraCsv($vista, $rango);
 // --- Una fila arriba con de qué período es -----------------------------
 // Sin esto, un archivo que secalled "Productos mas vendidos.csv" no
 // dice si es de julio o de todo el año, y a la semana ya no se sabe.
-$encabezado = 'Bar Atilio - ' . $vistas[$vista]['csv'] . ' - '
+// El nombre sale de la configuracion, no escrito a mano: si el
+// dueño cambia el nombre del bar en Configuracion, el archivo tiene
+// que cambiar con él.
+$nombreBar = trim((string) config_valor('publico_nombre', (string) APP_NOMBRE));
+
+$encabezado = ($nombreBar !== '' ? $nombreBar : (string) APP_NOMBRE)
+    . ' - ' . $vistas[$vista]['csv'] . ' - '
     . Reportes::etiquetaRango($rango);
 
 // --- Nombre del archivo -------------------------------------------------

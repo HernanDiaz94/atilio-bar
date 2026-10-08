@@ -1,0 +1,411 @@
+/* ==================================================================
+   LA PAGINA PUBLICA (Etapa 6)
+   ------------------------------------------------------------------
+   Esta hoja es aparte de theme.css a proposito: la pagina publica se
+   abre sin sesion y tiene que cargar rapido, y el panel ya carga sus
+   estilos sola. Mezclarlas haría que un visitante sin sesión descargara
+   el CSS entero del sistema.
+
+   Pensada para el teléfono y para leerla de pie, con la calle atrás.
+   ================================================================== */
+
+.publico-cuerpo {
+    background: #FFFDF4;
+    color: #2F3E2F;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0 0 3rem;
+    line-height: 1.55;
+}
+
+.publico-envoltura {
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ---------- Cabecera ---------- */
+.publico-cabecera {
+    text-align: center;
+    padding: 2.5rem 0 1.25rem;
+}
+
+.publico-logo {
+    width: 72px;
+    height: 72px;
+    margin-bottom: .5rem;
+}
+
+.publico-cabecera h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #2F4F2F;
+    letter-spacing: -.01em;
+}
+
+.publico-direccion {
+    margin: .35rem 0 0;
+    color: #5C6B5C;
+    font-size: .98rem;
+}
+
+.publico-texto {
+    margin: .9rem auto 0;
+    max-width: 34rem;
+    color: #445444;
+}
+
+/* ---------- ¿Abierto o cerrado? ----------
+   Lo primero de todo, porque es lo que la gente vino a ver. Va con
+   punto y con ícono, no solo con color: hay gente que no distingue el
+   verde del rojo, y un cartel de "abierto" solo en verde es un cartel
+   que para la mitad no dice nada. */
+.estado-grande {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: .2rem;
+    padding: 1.5rem 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 16px;
+    border: 3px solid;
+}
+
+.estado-grande-abierto {
+    background: #E4F5DE;
+    border-color: #5A8F4E;
+}
+
+.estado-grande-cerrado {
+    background: #F1EEE4;
+    border-color: #8A8F7A;
+}
+
+.estado-grande-icono {
+    font-size: 2.6rem;
+    line-height: 1;
+}
+
+.estado-grande-abierto .estado-grande-icono {
+    color: #2F7A28;
+}
+
+.estado-grande-cerrado .estado-grande-icono {
+    color: #6B6F5C;
+}
+
+.estado-grande strong {
+    font-size: 1.65rem;
+    font-weight: 800;
+}
+
+.estado-grande-abierto strong {
+    color: #226120;
+}
+
+.estado-grande-cerrado strong {
+    color: #4A4E3E;
+}
+
+.estado-grande-detalle {
+    font-size: 1.05rem;
+    color: #445444;
+}
+
+.estado-grande-motivo {
+    margin-top: .3rem;
+    padding: .1rem .6rem;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid #C9CDB8;
+    font-size: .85rem;
+    color: #5C5F4C;
+}
+
+/* ---------- Llamar y llegar ----------
+   Botones grandes, con el ícono arriba del texto: se leen sin leer. */
+.publico-contacto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+}
+
+.publico-boton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .15rem;
+    padding: 1.1rem .75rem;
+    border: 2px solid #B08A00;
+    border-radius: 14px;
+    background: #FFF9E6;
+    color: #5C4700;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 700;
+}
+
+.publico-boton .bi {
+    font-size: 1.7rem;
+    color: #B08A00;
+}
+
+.publico-boton small {
+    font-weight: 400;
+    font-size: .8rem;
+    color: #6E6A4F;
+}
+
+.publico-boton:hover,
+.publico-boton:active {
+    background: #FFF3CC;
+}
+
+/* ---------- Mapa ---------- */
+.publico-bloque {
+    margin-bottom: 2rem;
+}
+
+.publico-mapa {
+    border: 2px solid #D8D8C4;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #EFEFDF;
+}
+
+.publico-mapa iframe {
+    display: block;
+    width: 100%;
+    height: 15rem;
+    border: 0;
+}
+
+/* ---------- Títulos de bloque ---------- */
+.publico-bloque h2 {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0 0 .75rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #2F4F2F;
+    padding-bottom: .4rem;
+    border-bottom: 2px solid #E4E4CE;
+}
+
+.publico-bloque h2 .bi {
+    color: #B08A00;
+}
+
+/* ---------- Horarios ---------- */
+.publico-horarios {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.publico-horarios li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .6rem .25rem;
+    border-bottom: 1px dashed #E0E0CA;
+}
+
+.publico-horarios li:last-child {
+    border-bottom: 0;
+}
+
+.publico-horarios li.hoy {
+    background: #E4F5DE;
+    border-radius: 8px;
+    padding-left: .6rem;
+    padding-right: .6rem;
+    border-bottom: 0;
+    font-weight: 700;
+}
+
+.publico-horarios li.hoy .publico-dia::after {
+    content: ' · hoy';
+    font-size: .8rem;
+    font-weight: 700;
+    color: #2F7A28;
+}
+
+.publico-dia {
+    font-weight: 600;
+}
+
+.publico-horario {
+    color: #445444;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+/* ---------- Días cerrados ---------- */
+.publico-cierres {
+    margin-top: 1.25rem;
+    padding: .9rem 1rem;
+    border: 2px dashed #C08A6A;
+    border-radius: 12px;
+    background: #FDF3EC;
+}
+
+.publico-cierres strong {
+    display: block;
+    margin-bottom: .35rem;
+    color: #7A4423;
+}
+
+.publico-cierres ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.publico-cierres li {
+    padding: .2rem 0;
+    color: #5C4030;
+    font-variant-numeric: tabular-nums;
+}
+
+.publico-cierre-motivo {
+    color: #8A6A55;
+    font-size: .9em;
+}
+
+/* ---------- La carta ---------- */
+.publico-categoria {
+    margin: 1.5rem 0 .5rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #6E5A00;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.publico-carta {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.publico-carta > li {
+    padding: .7rem 0;
+    border-bottom: 1px solid #EDEDDC;
+}
+
+.publico-carta > li:last-child {
+    border-bottom: 0;
+}
+
+.publico-producto-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.publico-producto-nombre {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.publico-producto-precio {
+    font-weight: 800;
+    color: #2F4F2F;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Media docena, docena... */
+.publico-formas {
+    list-style: none;
+    margin: .35rem 0 0;
+    padding: 0;
+}
+
+.publico-formas li {
+    display: flex;
+    justify-content: space-between;
+    padding: .15rem 0 .15rem .8rem;
+    font-size: .95rem;
+    color: #445444;
+    font-variant-numeric: tabular-nums;
+}
+
+.publico-formas li span:last-child {
+    font-weight: 700;
+    color: #2F4F2F;
+}
+
+.publico-producto-descripcion {
+    margin: .3rem 0 0;
+    font-size: .9rem;
+    color: #6E7A6E;
+}
+
+.publico-vacio {
+    color: #6E7A6E;
+}
+
+/* ---------- Pie ---------- */
+.publico-pie {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid #E4E4CE;
+    text-align: center;
+    font-size: .9rem;
+}
+
+.publico-pie a {
+    color: #2F7A28;
+}
+
+/* ---------- Teléfonos ----------
+   En pantallas chicas la página se lee de pie, mirando para el lado.
+   Tocar un botón de 60 px con el dedo gordo es fácil; uno de 30 es
+   un error. */
+@media (max-width: 480px) {
+    .publico-cabecera h1 {
+        font-size: 1.6rem;
+    }
+
+    .estado-grande {
+        padding: 1.25rem .75rem;
+    }
+
+    .estado-grande strong {
+        font-size: 1.4rem;
+    }
+
+    .publico-mapa iframe {
+        height: 12rem;
+    }
+
+    .publico-contacto {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Impresión ----------
+   Si alguien imprime la carta, que salga limpia: sin colores de
+   fondo y sin el botón de llamar. */
+@media print {
+    .publico-cuerpo {
+        background: #fff;
+    }
+
+    .publico-contacto,
+    .publico-mapa,
+    .publico-pie {
+        display: none;
+    }
+
+    .estado-grande {
+        border-width: 2px;
+    }
+}

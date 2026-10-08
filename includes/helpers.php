@@ -214,6 +214,30 @@ function fecha_dia_semana(string|int|null $fecha): string
 }
 
 /**
+ * URL absoluta: con https:// y el dominio.
+ *
+ * Hace falta para los datos estructurados que lee Google: ahí no
+ * valen las rutas relativas, y un bloque con "/index.php?r=publico"
+ * se ignora silenciosamente.
+ */
+function url_absoluta(string $ruta = '', bool $esArchivo = false): string
+{
+    $esquema = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+
+    // En algunos servidores de hosting compartido el nombre viene
+    // en HTTP_HOST. Si no está, se cae a 'localhost' en vez de
+    // inventar un dominio.
+    $host = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
+
+    // Ojo: una RUTA y un ARCHIVO se arman distinto. url() mete
+    // "?r=..." y url_archivo() no. Pasar un archivo por url() da
+    // "/index.php?r=assets/img/logo.svg", que no existe.
+    $parte = $esArchivo ? url_archivo($ruta) : url($ruta);
+
+    return $esquema . '://' . $host . $parte;
+}
+
+/**
  * Porcentaje al estilo argentino: 54,3%
  *
  * Sin esto el porcentaje sale con punto (54.3%) mientras que todos

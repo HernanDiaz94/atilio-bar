@@ -16,7 +16,10 @@ Composer, sin SSH**: se sube por FTP a un hosting compartido.
 | 3 | Mesas y pedidos | Completada |
 | 4 | Ventas, cobro y caja | Completada |
 | 5 | Reportes y exportación a CSV | Completada |
-| 6 | Página pública y horarios | Pendiente |
+| 6 | Horarios y página pública | Completada |
+
+Las seis etapas están completas. Queda lo que se agrega a partir de
+acá: por ejemplo, imprimir tickets o mandar el reporte por mail.
 
 Cada etapa trae su migración en un archivo aparte, para poder
 aplicarla sobre una base que ya tiene datos sin romper nada.
@@ -39,6 +42,7 @@ sobre la base que ya tiene datos, sin tocar las tablas anteriores.
 | 3      | `sql/etapa3.sql`    | Mesas, pedidos y reservas          |
 | 4      | `sql/etapa4.sql`    | Cobro, ventas y caja               |
 | 5      | `sql/etapa5.sql`    | Reportes y CSV                     |
+| 6      | `sql/etapa6.sql`    | Horarios y página pública          |
 
 Cada migración es segura de correr más de una vez: los `CREATE TABLE`
 usan `IF NOT EXISTS` y los datos iniciales se insertan solo si no
@@ -179,6 +183,82 @@ de configuración:
 
 ---
 
+## Horarios y página pública (Etapa 6)
+
+La cara del bar para cualquiera que la encuentre en Google.
+
+### El horario que cruza la medianoche
+
+Un bar abre el martes a las 20 y cierra el **miércoles a las 2**. Las
+dos horas son números: "02:00" es más chico que "20:00", así que el
+sistema no puede deducir solo si esa noche está cerrada. Y si lo
+hiciera por su cuenta, algún día se equivocaría y mandaría gente a un
+bar cerrado.
+
+Por eso el horario guarda explícitamente `cierra_dia`: a qué día
+pertenece el cierre. Lo marca el dueño en una casilla, y el sistema
+solo lo deduce cuando el cierre es más temprano que la apertura, que es
+el caso obvio.
+
+```
+Martes    20:00 a 02:00 (Miércoles)     ← cruzando la medianoche
+Viernes   20:00 a 03:00 (Sábado)        ← el viernes cierra más tarde
+Lunes     Cerrado
+```
+
+También funciona al revés: un bar que abre a la 00 y cierra a las 2 se
+guarda como "00:00 a 02:00, mismo día", que es lo que dice.
+
+### ¿Está abierto ahora?
+
+La primera respuesta de la página. Mira el turno de hoy **y el de
+ayer**, porque a la 01:30 del miércoles el turno que está corriendo es
+el del martes. Cuando está cerrado dice cuándo vuelve a abrir, saltando
+los días marcados como cerrado.
+
+Los días cerrados son fechas concretas (feriado, vacaciones) y la
+semántica importa: la fecha es el día en que el bar **no abre**, no
+corta el turno anterior. Si el jueves está marcado, el bar del
+miércoles a la noche sigue hasta las 2. Al revés sería imposible cerrar
+una sola noche.
+
+### La página pública
+
+Es lo único del sistema que se abre sin sesión. Muestra:
+
+- si está abierto ahora y hasta cuándo;
+- el horario de la semana;
+- teléfono y ubicación con mapa;
+- **la carta con precios**.
+
+La consulta de los productos **no pide la columna `costo`**. No es que
+esté escondido: no se pide. No hay forma de que el precio de compra
+del fernet llegue al HTML, ni por error ni por descuido.
+
+### Para que aparezca en Google
+
+La página lleva los datos estructurados de tipo `BarOrPub` con el
+horario de atención. Eso es lo que Google usa para mostrar "Abierto ·
+Cierra 02:00" en los resultados, que es justo lo que la gente busca.
+
+Dos detalles que importan: las URLs tienen que ser **absolutas**
+(`https://sitio/index.php?r=publico`) porque Google ignora las
+relativas, y el título y la descripción cambian según esté abierto o
+cerrado.
+
+### Editar el horario
+
+Lo edita el administrador, desde **Horarios**. Botones grandes, la hora
+de apertura y la de cierre para cada día, y una casilla para "cierra al
+día siguiente".
+
+Si un horario tiene un error, **no se guarda ninguno**: o se guarda la
+semana entera o no se guarda nada. Si se guardara a medias, el dueño
+corrige el día marcado y cree que los otros sí quedaron. El mensaje lo
+dice con todas las letras.
+
+---
+
 ## Instalación rápida en tu máquina
 
 Necesitás PHP 8 con `pdo_mysql` y un MySQL o MariaDB.
@@ -232,6 +312,7 @@ AtilioBar/
 │   ├── descuentos.php        Descuento pendiente mientras se cobra
 │   ├── schema.php            Detecta si falta importar una migración
 │   ├── reportes.php          Los cuatro reportes y el CSV
+│   ├── horarios.php          Horario, días cerrados y datos para Google
 │   ├── auditoria.php         Registro de acciones
 │   ├── router.php            Mapa de rutas y control de acceso
 │   ├── header.php / footer.php    Layout base
@@ -247,6 +328,8 @@ AtilioBar/
 │   ├── caja/                 Turnos y conteo de dinero (Etapa 4)
 │   ├── ventas/               Historial de ventas (Etapa 4)
 │   ├── reportes/             Reportes y descarga CSV (Etapa 5)
+│   ├── horarios/             Editar el horario y cerrar días (Etapa 6)
+│   ├── publico/              La página sin sesión (Etapa 6)
 │   └── auth/salir.php        Cierre de sesión
 │
 ├── assets/
@@ -259,7 +342,8 @@ AtilioBar/
 │   ├── etapa2.sql            Migración de la Etapa 2
 │   ├── etapa3.sql            Migración de la Etapa 3
 │   ├── etapa4.sql            Migración de la Etapa 4
-│   └── etapa5.sql            Migración de la Etapa 5
+│   ├── etapa5.sql            Migración de la Etapa 5
+│   └── etapa6.sql            Migración de la Etapa 6
 └── logs/                     Errores de PHP (no se versiona)
 ```
 

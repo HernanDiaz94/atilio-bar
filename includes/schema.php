@@ -46,6 +46,9 @@ final class Schema
         'mesas' => 'etapa 3 (sql/etapa3.sql)',
         'comandas' => 'etapa 3 (sql/etapa3.sql)',
 
+        // Etapa 6
+        'horarios' => 'etapa 6 (sql/etapa6.sql)',
+
         // Etapa 4
         'metodos_pago' => 'etapa 4 (sql/etapa4.sql)',
         'cajas' => 'etapa 4 (sql/etapa4.sql)',

@@ -156,6 +156,8 @@ require_once __DIR__ . '/ventas.php';
 require_once __DIR__ . '/descuentos.php';
 // Reportes (Etapa 5): las cuatro consultas del bar.
 require_once __DIR__ . '/reportes.php';
+// Horarios y días cerrados (Etapa 6).
+require_once __DIR__ . '/horarios.php';
 // El router cierra el arranque: es el que despacha a los módulos.
 require_once __DIR__ . '/router.php';
 
@@ -207,11 +209,16 @@ set_exception_handler(function (Throwable $e): void {
         http_response_code(500);
     }
 
-    // Los errores de base de datos casi siempre son credenciales malas.
-    // En ese caso tiene más sentido mandar al instalador.
+    // Un error de base de datos NO es siempre una conexión fallida.
+    //
+    // Antes, cualquier PDOException mostraba "no se pudo conectar",
+    // y con eso una clave foránea violada mandaba al dueño a revisar
+    // config.php, que era exactamente el archivo que estaba bien. Lo
+    // que se muestra dice la verdad y reenvía al log.
     if ($e instanceof PDOException) {
-        $mensajeError = 'No se pudo conectar con la base de datos. Revisá los datos en config/config.php y que la base exista en el hosting.';
-        $titulo       = 'Error de conexión';
+        $titulo       = 'Error de la base de datos';
+        $mensajeError = 'La base de datos no aceptó la operación. Si podés, volvé a probar; '
+            . 'si sigue, el detalle quedó en logs/app.log en el servidor.';
         require __DIR__ . '/vistas/500.php';
         exit;
     }

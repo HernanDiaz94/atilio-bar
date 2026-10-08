@@ -18,6 +18,16 @@
  */
 final class Auth
 {
+    /**
+     * El "rol" de las rutas que no piden sesión.
+     *
+     * No es un rol de verdad: es una marca para el router. Sirve para
+     * que una ruta pueda declararse pública sin que haya que agregar
+     * una excepción suelta en el router, que es donde las excepciones
+     * se olvidan.
+     */
+    public const ROL_PUBLICO = 'publico';
+
     /** Datos del usuario logueado, cargados una vez por request. */
     private static ?array $usuario = null;
     private static bool $cargado = false;
@@ -160,6 +170,15 @@ final class Auth
      */
     public static function requiere_rol(string $rolRequerido): void
     {
+        // Una ruta marcada como pública no pide sesión. Va dentro de
+        // este método y no como una comprobación suelta en el router
+        // a propósito: el router llama SIEMPRE a requiere_rol() antes
+        // de cargar un controlador, así que la excepción no se puede
+        // saltar por accidente.
+        if ($rolRequerido === self::ROL_PUBLICO) {
+            return;
+        }
+
         self::requiere_login();
 
         if (!self::es_rol($rolRequerido)) {
