@@ -145,13 +145,23 @@ function instalar_esquema(): array
         // Se insertan solo las claves que no existan todavía, así
         // el instalador se puede volver a correr sin pisar
         // cambios hechos desde la interfaz.
+        // OJO: aca NO van las claves del nombre del bar ni las
+        // del ticket (bar_nombre, bar_direccion, bar_telefono,
+        // bar_horario, ticket_pie, ticket_mostrar_logo).
+        //
+        // Se quitaron porque NINGUN codigo las leia: se pusieron
+        // en la Etapa 1 para una impresion de tickets que nunca
+        // se construyo. Lo grave no es que sobraran, es que
+        // MENTIAN: la descripcion de bar_nombre decia "sale en
+        // la navbar, el login y el ticket", y en realidad eso sale
+        // de la constante APP_NOMBRE. Alguien cambiaba el nombre
+        // desde Configuracion, no pasaba nada, y se llevaba un
+        // rato largo para descubrirlo.
+        //
+        // El nombre del sistema esta en config/config.php
+        // (APP_NOMBRE). El de la pagina publica, en la clave
+        // publico_nombre de la Etapa 6, que esa si se usa.
         $valoresIniciales = [
-            ['bar_nombre', 'Atilio', 'texto', 'Nombre del bar. Sale en la navbar, el login y el ticket.', 'bar', 1],
-            ['bar_direccion', '', 'texto', 'Dirección del local, para los tickets.', 'bar', 1],
-            ['bar_telefono', '', 'texto', 'Teléfono de contacto.', 'bar', 1],
-            ['bar_horario', '', 'texto', 'Texto libre con los horarios de atención.', 'bar', 1],
-            ['ticket_pie', '¡Gracias por su visita!', 'texto', 'Mensaje al pie del ticket.', 'bar', 1],
-            ['ticket_mostrar_logo', '1', 'booleano', 'Si el ticket lleva el logo arriba.', 'bar', 1],
             ['seguridad_max_intentos', '5', 'numero', 'Intentos fallidos antes de bloquear una cuenta.', 'seguridad', 1],
             ['seguridad_minutos_bloqueo', '15', 'numero', 'Minutos de bloqueo al superar los intentos.', 'seguridad', 1],
             ['seguridad_minutos_sesion', '120', 'numero', 'Minutos de inactividad antes de cerrar la sesión.', 'seguridad', 1],

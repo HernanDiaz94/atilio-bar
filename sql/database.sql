@@ -151,17 +151,16 @@ CREATE TABLE IF NOT EXISTS `auditoria` (
 --     vez. Importar este archivo desde phpMyAdmin y después correr
 --     install.php (paso 4) deja el sistema listo.
 -- ==================================================================
+-- OJO: no se siembran bar_nombre, bar_direccion, bar_telefono,
+-- bar_horario, ticket_pie ni ticket_mostrar_logo. Sequitaron porque
+-- ningun codigo las leia y sus descripciones mentian: el nombre del
+-- bar sale de APP_NOMBRE, en config/config.php. El nombre de la
+-- pagina publica sale de publico_nombre (etapa 6).
 INSERT INTO `configuracion`
     (`clave`, `valor`, `tipo`, `descripcion`, `grupo`, `editable`, `creado_en`)
 VALUES
-    ('bar_nombre', 'Atilio', 'texto', 'Nombre del bar. Sale en la navbar, el login y el ticket.', 'bar', 1, NOW()),
 
-    ('bar_direccion', '', 'texto', 'Dirección del local, para los tickets.', 'bar', 1, NOW()),
-    ('bar_telefono', '', 'texto', 'Teléfono de contacto.', 'bar', 1, NOW()),
-    ('bar_horario', '', 'texto', 'Texto libre con los horarios de atención.', 'bar', 1, NOW()),
 
-    ('ticket_pie', '¡Gracias por su visita!', 'texto', 'Mensaje al pie del ticket.', 'bar', 1, NOW()),
-    ('ticket_mostrar_logo', '1', 'booleano', 'Si el ticket lleva el logo arriba.', 'bar', 1, NOW()),
 
     ('seguridad_max_intentos', '5', 'numero', 'Intentos fallidos antes de bloquear una cuenta.', 'seguridad', 1, NOW()),
     ('seguridad_minutos_bloqueo', '15', 'numero', 'Minutos de bloqueo al superar los intentos.', 'seguridad', 1, NOW()),

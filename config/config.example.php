@@ -50,8 +50,16 @@ define('DB_CHARSET', 'utf8mb4');
 // 2) DATOS GENERALES DE LA APLICACIÓN
 // ================================================================
 
-// Nombre del negocio (se usa en la navbar, el login y los tickets)
-define('APP_NOMBRE', 'Atilio');
+// Nombre del negocio.
+//
+// ESTE es el nombre que sale en la barra superior, el login, los
+// títulos de las pestañas y el pie. Es el único lugar donde vive.
+//
+// Ojo: la base de datos tiene otras claves de nombre (publico_nombre,
+// que es el de la página pública). Son cosas distintas: esta es la
+// del sistema, aquella la de la web. Si las dos tienen que decir lo
+// mismo, cambiala en las dos.
+define('APP_NOMBRE', 'Atilio Bar');
 
 // Entorno de ejecución.
 //   'produccion'  -> no muestra errores, los guarda en logs/app.log  (USAR ESTE)
