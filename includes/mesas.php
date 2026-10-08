@@ -30,7 +30,7 @@ final class Mesas
 {
     /** Zonas del bar, con su etiqueta. */
     public const ZONAS = [
-        'salon'  => 'Salon',
+        'salon'  => 'Salón',
         'vereda' => 'Vereda',
         'barra'  => 'Barra',
     ];
@@ -401,8 +401,13 @@ final class Comanda
             ];
         }
 
+        // Se pide "costo" aunque el vendedor no lo pueda ver nunca.
+        // La consulta corre en el servidor y el valor se guarda en
+        // la linea de la comanda: de ahi salen las ganancias de los
+        // reportes (Etapa 5). Si no se pidiera acá, quedaria en
+        // NULL y ningun reporte podria calcular la ganancia.
         $producto = DB::one(
-            'SELECT id, nombre, precio_venta, controla_stock, stock_actual,
+            'SELECT id, nombre, precio_venta, costo, controla_stock, stock_actual,
                     stock_minimo, unidad, es_combo, activo
              FROM productos
              WHERE id = :id',
@@ -485,6 +490,17 @@ final class Comanda
                     'producto_id'     => $producto['id'],
                     'producto_nombre' => $producto['nombre'],
                     'precio_unitario' => $producto['precio_venta'],
+
+                    // El costo tambien se guarda, y no se busca
+                    // cuando se arma el reporte (Etapa 5). Si manana
+                    // el costo del fernet sube, el reporte de hoy tiene
+                    // que seguir hablando de hoy.
+                    //
+                    // Puede quedar en NULL a proposito: NULL quiere
+                    // decir "no se sabe el costo", que es distinto de
+                    // cero. El reporte avisa en vez de mostrar una
+                    // ganancia inflada.
+                    'costo_unitario'  => $producto['costo'],
                     'cantidad'        => $cantidad,
                     'importe'         => $importe,
                     'estado'          => 'pendiente',

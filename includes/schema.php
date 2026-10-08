@@ -53,6 +53,28 @@ final class Schema
     ];
 
     /**
+     * Columnas que tienen que existir, y de qué archivo salen.
+     *
+     * PUESTEN ESTAR Y POR QUÉ IMPORTA
+     *
+     * La Etapa 5 agrega `costo_unitario` a `comanda_items` porque al
+     * cargar un producto a una mesa se guarda el costo de ese momento.
+     * Si los archivos PHP se suben pero `sql/etapa5.sql` no se importa,
+     * la columna no esta: no avisa ningun error de sintaxis ni de PHP,
+     * simplemente falla el INSERT al agregar un producto y el mozo no
+     * puede cargar el pedido.
+     *
+     * Es el peor tipo de falla: silenciosa, y recien aparece cuando
+     * alguien esta atendiendo una mesa. Por eso se chequea al
+     * arrancar y se dice qué archivo falta, como con las tablas.
+     *
+     * @var array<string, string> "tabla.columna" => archivo
+     */
+    private const COLUMNAS = [
+        'comanda_items.costo_unitario' => 'etapa 5 (sql/etapa5.sql)',
+    ];
+
+    /**
      * Se puede siquiera intentar leer el catalogo de tablas.
      *
      * Si la conexion falla esto da falso y deja que el manejo de
@@ -105,6 +127,30 @@ final class Schema
             }
 
             $cache[$archivo][] = $tabla;
+        }
+
+        // Las columnas solo se miran si su tabla esta: si la tabla no
+        // esta, ya se aviso de eso y la columna no viene al caso.
+        foreach (self::COLUMNAS as $completa => $archivo) {
+            [$tabla, $columna] = explode('.', $completa, 2);
+
+            if (!isset($existentes[$tabla])) {
+                continue;
+            }
+
+            $tiene = DB::valor(
+                'SELECT COUNT(*) FROM information_schema.COLUMNS
+                  WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME   = :tabla
+                    AND COLUMN_NAME  = :columna',
+                ['tabla' => $tabla, 'columna' => $columna]
+            );
+
+            if ((int) $tiene > 0) {
+                continue;
+            }
+
+            $cache[$archivo][] = $tabla . '.' . $columna;
         }
 
         return $cache;

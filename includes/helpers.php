@@ -192,6 +192,49 @@ function fecha_corta(string|int|null $fecha): string
     return $timestamp === null ? '-' : date('d/m/y', $timestamp);
 }
 
+/** Dia de la semana en Castellano: lunes, martes... */
+function fecha_dia_semana(string|int|null $fecha): string
+{
+    $timestamp = a_timestamp($fecha);
+
+    if ($timestamp === null) {
+        return '-';
+    }
+
+    // array_positivo evita el 1 de PHP: date() numera de 0.
+    return [
+        0 => 'domingo',
+        1 => 'lunes',
+        2 => 'martes',
+        3 => 'miercoles',
+        4 => 'jueves',
+        5 => 'viernes',
+        6 => 'sabado',
+    ][(int) date('w', $timestamp)] ?? '-';
+}
+
+/**
+ * Porcentaje al estilo argentino: 54,3%
+ *
+ * Sin esto el porcentaje sale con punto (54.3%) mientras que todos
+ * los importes de al lado usan coma. Es el mismo numero escrito de
+ * dos formas, y el ojo lo lee como dos cosas distintas.
+ */
+function porcentaje(float|null $numero, int $decimales = 1): string
+{
+    if ($numero === null) {
+        return '-';
+    }
+
+    return number_format($numero, $decimales, ',', '.') . '%';
+}
+
+/** Numero al estilo que espera el Excel en español: 1.234,56 */
+function numero_csv(float $numero): string
+{
+    return number_format($numero, 2, ',', '.');
+}
+
 /** Hora suelta: 23:45 */
 function hora(string|int|null $fecha): string
 {

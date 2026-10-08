@@ -334,3 +334,23 @@ una etapa, la aplicación no se cae: abre con un cartel que dice
 exactamente qué archivo falta y cómo arreglarlo. El cartel no
 muestra ningún dato del servidor.
 
+### Qué trae la Etapa 5
+
+Al importarla aparece la pantalla **Reportes**, con cuatro reportes y
+la descarga en CSV.
+
+Lo único que cambia en la base es una columna nueva
+(`comanda_items.costo_unitario`) y dos índices. **No se toca ninguna
+tabla anterior ni ningún dato que ya tengas.**
+
+Se importa como las demás: phpMyAdmin → tu base → **Importar** →
+`sql/etapa5.sql` → **Ejecutar**.
+
+**Importala antes de usar la carta.** Si los archivos PHP están
+subidos pero la migración no, al cargar un producto a una mesa falla
+silenciosamente. Para eso está el aviso: si falta, el sistema abre con
+un cartel que dice que falta `sql/etapa5.sql` y qué columna es, en vez
+de dejarte atendido un mesa sin poder cargar el pedido.
+
+Los reportes son **solo del administrador**.
+

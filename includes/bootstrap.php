@@ -154,6 +154,8 @@ require_once __DIR__ . '/mesas.php';
 require_once __DIR__ . '/ventas.php';
 // El descuento pendiente mientras se cobra (Etapa 4).
 require_once __DIR__ . '/descuentos.php';
+// Reportes (Etapa 5): las cuatro consultas del bar.
+require_once __DIR__ . '/reportes.php';
 // El router cierra el arranque: es el que despacha a los módulos.
 require_once __DIR__ . '/router.php';
 

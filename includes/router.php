@@ -514,6 +514,30 @@ function rutas_app(): array
             'ocultar'     => 'es_admin',
         ],
 
+        // ---------- Reportes (solo admin) ----------
+        //
+        // Llevan la ganancia y el costo de los productos, que no son
+        // asunto del vendedor. El permiso va en la ruta porque es lo
+        // primero que se mira al entrar: si el usuario no tiene el
+        // permiso, ni siquiera se carga el archivo del controlador.
+        'reportes' => [
+            'controlador' => 'reportes/index.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Reportes',
+            'icono'       => 'bi-graph-up',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
+        'reportes/csv' => [
+            'controlador' => 'reportes/csv.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Descargar reporte',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => 'es_admin',
+        ],
+
         'ventas/ver' => [
             'controlador' => 'ventas/ver.php',
             'permiso'     => 'administrador',

@@ -13,15 +13,13 @@ Composer, sin SSH**: se sube por FTP a un hosting compartido.
 |---|---|---|
 | 1 | Base, login, usuarios y configuración | Completada |
 | 2 | Productos, categorías y stock | Completada |
-| 3 | Mesas y pedidos | Pendiente |
-| 4 | Ventas, cobro y caja | Pendiente |
-| 5 | Reportes y exportación a CSV | Pendiente |
+| 3 | Mesas y pedidos | Completada |
+| 4 | Ventas, cobro y caja | Completada |
+| 5 | Reportes y exportación a CSV | Completada |
 | 6 | Página pública y horarios | Pendiente |
 
-Las etapas 5 y 6 están diseñadas en el modelo de datos pero todavía
-no se desarrollan. Sus cambios de base de datos van en archivos SQL
-separados (`sql/etapa5.sql`), para poder aplicarlos sobre una base
-que ya tiene datos.
+Cada etapa trae su migración en un archivo aparte, para poder
+aplicarla sobre una base que ya tiene datos sin romper nada.
 
 ---
 
@@ -40,6 +38,7 @@ sobre la base que ya tiene datos, sin tocar las tablas anteriores.
 | 2      | `sql/etapa2.sql`    | Carta de productos y stock         |
 | 3      | `sql/etapa3.sql`    | Mesas, pedidos y reservas          |
 | 4      | `sql/etapa4.sql`    | Cobro, ventas y caja               |
+| 5      | `sql/etapa5.sql`    | Reportes y CSV                     |
 
 Cada migración es segura de correr más de una vez: los `CREATE TABLE`
 usan `IF NOT EXISTS` y los datos iniciales se insertan solo si no
@@ -104,6 +103,82 @@ se devolvió.
 
 ---
 
+## Reportes (Etapa 5)
+
+Cuatro números que el dueño miraba de memoria y ahora están en pantalla.
+
+### Los cuatro
+
+| Reporto | Para qué sirve |
+|---|---|
+| **Por día** | Cuánto se facturó cada día, y cuánto se ganó |
+| **Qué se vende** | Los productos ordenados por cantidad, para saber qué comprar |
+| **Mesas y zonas** | Cuánto factura cada mesa, y salón contra vereda contra barra |
+| **Medios de pago** | Cuánto entró en efectivo y cuánto con tarjeta |
+
+El período se elige con botones (hoy, ayer, esta semana, este mes,
+mes anterior) o poniendo las fechas a mano. Arriba siempre está el
+total del período: cuánto se vendió, cuánto se ganó, y cuánto por
+persona.
+
+Cada reporte baja a **CSV** con el botón de arriba. El archivo está
+armado para que el Excel en español lo abra bien: separador punto y
+coma, coma decimal, y las tildes correctas (lleva el BOM, que sin él
+el Excel lee las tildes como dos letras raras y "Café" aparece con la
+A acentuada y la e con un signo arriba).
+
+### La ganancia usa el costo del momento, no el de hoy
+
+Cuando se carga un producto a una mesa, el sistema guarda el costo que
+tenía **en ese momento**, igual que ya guardaba el precio. Por eso, si
+mañana el costo del fernet sube de $900 a $1.100, el reporte de hoy
+sigue diciendo lo que pasó hoy.
+
+Si el sistema usara el costo actual, un reporte de marzo estaría
+contando con precios de junio: el número no mentía, pero contestaba
+otra pregunta.
+
+### Cuando un producto no tiene costo cargado, el reporte lo dice
+
+`NULL` no es cero. Si a un producto nunca le cargaron el costo, el
+reporte **no** lo trata como si costara nada (eso haría que la
+ganancia salga inflada: "vendí $10.000 y me quedaron $10.000", que es
+falso). En cambio avisa arriba, con letra:
+
+> 4 ventas del período no tienen costo de producto cargado, así que
+> la ganancia que ves está SUBESTIMADA.
+
+Esa cifra está en amarillo, no en verde, para que no se tome por
+buena. Cuando se carga el costo en la carta, el número se corrige
+solo.
+
+### Las ventas anuladas no cuentan
+
+Una venta anulada fue cobrada y devuelta. Sumarla mostraría plata que
+no está. Todos los reportes filtran las anuladas.
+
+### Solo el administrador
+
+Los reportes llevan la ganancia y el costo, que no son asunto del
+vendedor. El vendedor recibe un 403 si entra por la URL, y el botón no
+le aparece.
+
+### Por qué no hay tablas nuevas
+
+Un reporte es una pregunta sobre datos que ya existen, no un dato
+nuevo. `sql/etapa5.sql` solo agrega la columna del costo, dos índices
+para que las sumas no se arrastren en un hosting lento, y dos claves
+de configuración:
+
+- `reporte_max_dias` (366): hasta dónde se puede mirar. Por hosting
+  son lento, y un reporte sobre cinco años puede tardar tanto que el
+  dueño piense que se colgó.
+- `reporte_costo_real_desde`: la fecha en que se aplicó la Etapa 5. Las
+  ventas anteriores usaron el costo que el producto tiene hoy, y el
+  reporte lo dice con esa fecha.
+
+---
+
 ## Instalación rápida en tu máquina
 
 Necesitás PHP 8 con `pdo_mysql` y un MySQL o MariaDB.
@@ -156,6 +231,7 @@ AtilioBar/
 │   ├── ventas.php            Ventas, cobros y caja (Etapa 4)
 │   ├── descuentos.php        Descuento pendiente mientras se cobra
 │   ├── schema.php            Detecta si falta importar una migración
+│   ├── reportes.php          Los cuatro reportes y el CSV
 │   ├── auditoria.php         Registro de acciones
 │   ├── router.php            Mapa de rutas y control de acceso
 │   ├── header.php / footer.php    Layout base
@@ -170,6 +246,7 @@ AtilioBar/
 │   ├── cobrar/               Pantalla de cobro (Etapa 4)
 │   ├── caja/                 Turnos y conteo de dinero (Etapa 4)
 │   ├── ventas/               Historial de ventas (Etapa 4)
+│   ├── reportes/             Reportes y descarga CSV (Etapa 5)
 │   └── auth/salir.php        Cierre de sesión
 │
 ├── assets/
@@ -181,7 +258,8 @@ AtilioBar/
 │   ├── database.sql          Esquema de la Etapa 1
 │   ├── etapa2.sql            Migración de la Etapa 2
 │   ├── etapa3.sql            Migración de la Etapa 3
-│   └── etapa4.sql            Migración de la Etapa 4
+│   ├── etapa4.sql            Migración de la Etapa 4
+│   └── etapa5.sql            Migración de la Etapa 5
 └── logs/                     Errores de PHP (no se versiona)
 ```
 
