@@ -160,6 +160,32 @@ textarea:focus-visible {
     border-radius: var(--radio-borde);
 }
 
+/* ------------------------------------------------------------
+   En pantalla chica el desplegable del usuario se abre hacia ARRIBA.
+
+   Por que: abajo de 992px la barra se convierte en el menu desplegable
+   y el boton del usuario queda al FINAL de una lista larga, pegado al
+   borde inferior. Abriendo hacia abajo el menu caia entero fuera de la
+   pantalla: medido en un viewport de 658px de alto, el desplegable iba
+   de 676 a 868 y no habia ni un pixel visible. O sea, "Mi cuenta" y
+   "Salir" quedaban inalcanzables justo en el celular, que es donde se
+   usan.
+
+   En pantalla grande no se toca nada: ahi el boton esta en la barra, con
+   espacio de sobra debajo, y el menu se abre hacia abajo como siempre.
+
+   El `position: relative` lo aporta la clase `dropdown` de Bootstrap
+   que esta en el HTML del boton. Sin ella, este "bottom: 100%" no se
+   mide contra el boton y el menu sale por donde no es.
+   ------------------------------------------------------------ */
+@media (max-width: 991.98px) {
+    .usuario-menu .dropdown-menu {
+        top: auto;
+        bottom: 100%;
+        margin-bottom: 0.35rem;
+    }
+}
+
 /* ================================================================
    CONTENIDO Y PIE
    ================================================================ */

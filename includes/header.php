@@ -67,6 +67,21 @@ $rutas      = $rutas      ?? function_exists('rutas_app') ? rutas_app() : [];
                 // el mapa, no aparece. Y el botón solo se oculta por rol;
                 // el control real igual lo hace el router.
                 foreach ($rutas as $nombre => $ruta):
+                    // Rutas que existen pero NO van en la barra. Se miran
+                    // por la bandera 'menu', no por el icono: vaciar el icono
+                    // es una convención invisible, y el dia que alguien le
+                    // ponga uno a una pantalla para otra cosa, vuelve a
+                    // aparecer en el menu sin que nadie se entere.
+                    //
+                    // "Mi cuenta" y "Salir" estan en el desplegable del
+                    // usuario, al final de la barra. Estaban tambien en la
+                    // barra principal, y quedaban pegados al resto: un boton
+                    // de "Salir" a dos pasos de los demas es un logout
+                    // accidental esperando que alguien pase el dedo.
+                    if (($ruta['menu'] ?? true) === false) {
+                        continue;
+                    }
+
                     // Solo menú: las rutas de acciones (sin icono) no van.
                     if ($ruta['icono'] === '') {
                         continue;
@@ -90,7 +105,13 @@ $rutas      = $rutas      ?? function_exists('rutas_app') ? rutas_app() : [];
             </ul>
 
             <?php if (Auth::logueado()): ?>
-                <div class="usuario-menu">
+                <!-- La clase "dropdown" es de Bootstrap y NO es decorativa: es la que
+                     convierte este div en el punto de anclaje del desplegable.
+                     Sin ella, el menu se posiciona contra otro elemento y el
+                     "bottom: 100%" del CSS de abajo no mide desde el lugar
+                     correcto, con lo cual el desplegable queda fuera de la
+                     pantalla. -->
+                <div class="usuario-menu dropdown">
                     <button class="btn btn-atilio btn-sm usuario-boton" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle-fill"></i>
@@ -108,7 +129,8 @@ $rutas      = $rutas      ?? function_exists('rutas_app') ? rutas_app() : [];
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item" href="<?= e(url('mi-cuenta')) ?>">
-                                <i class="bi bi-key-fill"></i> Cambiar mi contraseña
+                                <i class="bi bi-key-fill"></i> Mi cuenta
+                                <small class="d-block text-muted">Cambiar la contraseña</small>
                             </a>
                         </li>
                         <li>

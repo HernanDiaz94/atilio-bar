@@ -15,10 +15,47 @@
  *
  * Solo el administrador abre la caja. Registrar un movimiento lo
  * puede hacer cualquiera del turno.
+ *
  * -----------------------------------------------------------------
-*/
+ * POR QUE LA RUTA ES DE 'vendedor' Y NO DE 'administrador'
+ *
+ * La pantalla es doble: si la caja esta cerrada muestra el formulario
+ * para abrirla, y si ya esta abierta muestra SOLO el de entrada o
+ * salida de plata. El boton "Registrar movimiento" de la pantalla de
+ * caja lo ven los dos y apunta aca.
+ *
+ * Con la ruta en 'administrador', el vendedor que le daba click a ese
+ * boton se comia un 403 "Acceso denegado": el sistema le mostraba un
+ * boton y despues le decia que no podia usarlo. Por eso la ruta la
+ * abre cualquiera, y lo que es solo del administrador (abrir la caja)
+ * se controla mas abajo, que es donde se puede distinguir la accion.
+ * -----------------------------------------------------------------
+ */
 
 $accion = post('accion', 'abrir');
+
+// ------------------------------------------------------------
+// Abrir la caja es solo del administrador.
+//
+// Se controla aca y no en el router porque el router solo puede
+// decidir si la PANTALLA se abre, y esta pantalla la usan los dos
+// roles: la de abrir es del admin y la de movimiento es de
+// cualquiera del turno.
+//
+// OJO CON EL es_post(): sin esta comilla el vendedor no llega nunca
+// a ver el formulario. En un GET, post('accion') devuelve 'abrir'
+// (que es el valor por defecto), asi que frenar por el POST expulsa
+// al vendedor antes de que vea la pantalla. Solo se frena el POST
+// que intenta ABRIR la caja.
+//
+// Sin la guarda, abrir la ruta para el vendedor abriria la puerta de
+// abrir la caja tambien, que es lo contrario de lo que dice el
+// comentario de arriba.
+// ------------------------------------------------------------
+if (es_post() && $accion === 'abrir' && !Auth::es_admin()) {
+    flash_error('Abrir la caja lo hace el administrador.');
+    redirigir('caja');
+}
 
 // ------------------------------------------------------------
 // Registrar una entrada o salida
@@ -112,6 +149,11 @@ if (es_post() && $accion === 'abrir') {
 // GET: la pantalla
 // ------------------------------------------------------------
 $caja = Caja::abierta();
+
+if ($caja === null && !Auth::es_admin()) {
+    flash_error('No hay ninguna caja abierta.');
+    redirigir('caja');
+}
 
 if ($caja !== null) {
     // Si la caja ya está abierta, esta pantalla solo sirve para

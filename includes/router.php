@@ -29,6 +29,13 @@
  *      'grupo'       => 'principal' | 'gestion',
  *      'ocultar'     => nombre de la constante/variable de rol que
  *                      decide si aparece el enlace en el menú,
+ *      'menu'        => false para las rutas que existen pero NO van
+ *                      en la barra. Sin esta bandera la barra se
+ *                      armaba salteando las rutas sin icono, y eso
+ *                      metia en el menu cualquier pantalla a la que
+ *                      se le pusiera un icono: "Mi cuenta" y "Salir"
+ *                      quedaron pegadas al resto, y "Salir" era un
+ *                      boton de dos pasos del que lo rodea.
  *   ]
  *
  * @return array<string, array<string, mixed>>
@@ -63,6 +70,10 @@ function rutas_app(): array
             'icono'       => 'bi-person-lines-fill',
             'grupo'       => 'gestion',
             'ocultar'     => 'es_admin',
+
+            // Se llega desde el listado de Usuarios. En la barra solo
+            // ocupaba un lugar que el usuario no busca.
+            'menu'        => false,
         ],
 
         'usuarios/guardar' => [
@@ -91,6 +102,9 @@ function rutas_app(): array
             'icono'       => 'bi-key-fill',
             'grupo'       => 'principal',
             'ocultar'     => null,
+
+            // Va en el menu desplegable del usuario, no en la barra.
+            'menu'        => false,
         ],
 
         'mi-cuenta/guardar' => [
@@ -110,6 +124,9 @@ function rutas_app(): array
             'icono'       => 'bi-box-arrow-right',
             'grupo'       => 'principal',
             'ocultar'     => null,
+
+            // Va en el menu desplegable del usuario, no en la barra.
+            'menu'        => false,
         ],
 
         // ---------- Productos (Etapa 2) ----------
@@ -475,9 +492,25 @@ function rutas_app(): array
             'ocultar'     => null,
         ],
 
+        // Esta ruta la ven los dos. Cuando la caja ya esta abierta,
+        // la pantalla SOLO muestra el formulario de entrada o salida
+        // de plata, y eso lo puede hacer cualquiera del turno (esta
+        // misma pantalla tiene el boton "Registrar movimiento" en la
+        // caja, visible para los dos).
+        //
+        // Estava en 'administrador' y por eso el vendedor que le
+        // daba click al boton caia en un 403: el boton lo llevaba a
+        // una pantalla de la que no tenia permiso.
+        //
+        // ABRIR la caja sigue siendo solo del administrador, y eso se
+        // controla adentro de caja/abrir.php: es el unico lugar que
+        // sabe si el pedido es para abrir el turno o para registrar
+        // un movimiento. Si se quisiera dejar "abrir" en una ruta
+        // aparte habria que partir el.controller en dos, porque los
+        // dos formularios salen de la misma vista.
         'caja/abrir' => [
             'controlador' => 'caja/abrir.php',
-            'permiso'     => 'administrador',
+            'permiso'     => 'vendedor',
             'titulo'      => 'Abrir caja',
             'icono'       => '',
             'grupo'       => 'gestion',
