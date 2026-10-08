@@ -357,6 +357,144 @@ final class Caja
         }
     }
 
+    // ================================================================
+    //  CLAVE DE CAJA
+    //
+    //  El administrador la define y el vendedor tiene que escribirla
+    //  para abrir y cerrar el turno. El administrador no la pide nunca:
+    //  es suya.
+    //
+    //  Se guarda el hash, no la clave. Y se usa password_hash() a
+    //  proposito: es caro de calcular (a proposito), asi que probar
+    //  claves a fuerza tambien sale caro.
+    // ================================================================
+
+    /** La clave de la configuracion donde vive el hash. */
+    public const CLAVE_CONFIG = 'caja_clave_hash';
+
+    /** Intentos fallidos antes de frenar un rato. */
+    public const CLAVE_INTENTOS = 5;
+
+    /** Minutos de freno tras pasarse de intentos. */
+    public const CLAVE_MINUTOS_FRENO = 5;
+
+    /**
+     * Hay una clave de caja puesta?
+     *
+     * Si no hay, el vendedor no puede abrir ni cerrar. No es un
+     * olvido: es la unica forma de que el dueño sepa que todavia no
+     * configuro nada. Si esto devolviera true cuando no hay clave, el
+     * vendedor pasaria y el control seria de mentira.
+     */
+    public static function clave_configurada(): bool
+    {
+        return self::clave_hash() !== '';
+    }
+
+    /** El hash guardado. Nadie lo muestra, ni siquiera el admin. */
+    private static function clave_hash(): string
+    {
+        return (string) config_valor(self::CLAVE_CONFIG, '');
+    }
+
+    /**
+     * Guarda la clave de caja.
+     *
+     * Crea la fila si no existe: asi el dueño no tiene que importar
+     * una migracion nueva para poder usar esto.
+     */
+    public static function clave_guardar(string $clave): void
+    {
+        $hash = password_hash($clave, PASSWORD_DEFAULT);
+
+        DB::query(
+            "INSERT INTO `configuracion`
+                (`clave`, `valor`, `tipo`, `descripcion`, `grupo`, `editable`, `creado_en`, `actualizado_en`)
+             VALUES
+                (:clave, :valor, 'texto', :descripcion, 'caja', 0, NOW(), NOW())
+             ON DUPLICATE KEY UPDATE
+                `valor` = :valor_otra,
+                `actualizado_en` = NOW()",
+            [
+                'clave'       => self::CLAVE_CONFIG,
+                'valor'       => $hash,
+                'valor_otra'  => $hash,
+                'descripcion' => 'Clave que pide el sistema para abrir o cerrar la caja. Se guarda el hash, no la clave.',
+            ]
+        );
+    }
+
+    /** Saca la clave de caja. El vendedor vuelve a poder operar sin clave. */
+    public static function clave_quitar(): void
+    {
+        DB::query(
+            'UPDATE `configuracion` SET `valor` = :vacio, `actualizado_en` = NOW() WHERE `clave` = :clave',
+            ['vacio' => '', 'clave' => self::CLAVE_CONFIG]
+        );
+    }
+
+    /**
+     * Comprueba la clave que escribio el usuario.
+     *
+     * Devuelve true si la clave esta bien. Lleva la cuenta de los
+     * intentos fallidos en la sesion y frena un rato cuando se pasa:
+     * sin eso, probar claves a fuerza seria gratis.
+     *
+     * OJO: se usa password_verify(), que es caro a proposito. Por eso
+     * el freno por intentos no es lo unico que protege: probar claves
+     * a fuerza sale lento.
+     */
+    public static function clave_verificar(string $escrita): bool
+    {
+        $hash = self::clave_hash();
+
+        if ($hash === '') {
+            return false;
+        }
+
+        $intentos = (int) ($_SESSION['caja_clave_intentos'] ?? 0);
+        $hasta    = (int) ($_SESSION['caja_clave_freno_hasta'] ?? 0);
+
+        // Esta frenado todavia: no se ni intenta comparar.
+        if ($intentos >= self::CLAVE_INTENTOS && $hasta > time()) {
+            return false;
+        }
+
+        // Se cumplio el freno: arranca de cero.
+        if ($hasta > 0 && $hasta <= time()) {
+            $intentos = 0;
+            $hasta    = 0;
+        }
+
+        if (password_verify($escrita, $hash)) {
+            unset($_SESSION['caja_clave_intentos'], $_SESSION['caja_clave_freno_hasta']);
+
+            return true;
+        }
+
+        $intentos++;
+        $_SESSION['caja_clave_intentos'] = $intentos;
+
+        if ($intentos >= self::CLAVE_INTENTOS) {
+            $_SESSION['caja_clave_freno_hasta'] = time() + (self::CLAVE_MINUTOS_FRENO * 60);
+        }
+
+        return false;
+    }
+
+    /** Como viene la cosa de los intentos, para poder avisar. */
+    public static function clave_estado(): array
+    {
+        $intentos = (int) ($_SESSION['caja_clave_intentos'] ?? 0);
+        $hasta    = (int) ($_SESSION['caja_clave_freno_hasta'] ?? 0);
+
+        return [
+            'intentos' => $intentos,
+            'frenado'  => $intentos >= self::CLAVE_INTENTOS && $hasta > time(),
+            'minutos'  => $hasta > time() ? (int) ceil(($hasta - time()) / 60) : 0,
+        ];
+    }
+
     /**
      * Cajas ya cerradas, para el historial.
      */

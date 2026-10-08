@@ -103,6 +103,25 @@
                     <a href="<?= e(url('caja')) ?>" class="btn btn-atilio-amarillo">
                         Cancelar
                     </a>
+                    <?php if (!Auth::es_admin() && Caja::clave_configurada()): ?>
+                        <div class="marco-amarillo p-3 mb-3">
+                            <strong>Falta la clave de caja.</strong>
+                            <p class="mb-0 mt-1">
+                                Pedisela al administrador para cerrar el turno.
+                            </p>
+                        </div>
+
+                        <div class="campo mb-3">
+                            <label for="clave_caja" class="form-label">
+                                Clave de caja <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="clave_caja" name="clave_caja"
+                                   class="form-control" required minlength="4"
+                                   maxlength="40" autocomplete="off"
+                                   data-etiqueta="clave de caja">
+                        </div>
+                    <?php endif; ?>
+
                     <button type="submit" class="btn btn-atilio-oscuro"
                             data-confirmar="¿Cerrás el turno? Después no se pueden cargar ventas a esta caja.">
                         <i class="bi bi-lock-fill"></i> Cerrar la caja

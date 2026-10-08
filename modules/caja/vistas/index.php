@@ -20,9 +20,20 @@ if ($caja !== null) {
     $accionesCabecera = '<a href="' . e(url('caja/abrir')) . '" class="btn btn-atilio-amarillo">'
         . '<i class="bi bi-plus-circle"></i> Registrar movimiento</a>';
 
+    // Cerrar el turno lo puede hacer cualquiera, no solo el
+    // administrador. El que lo cierra queda con su nombre en el
+    // registro del turno.
+    $accionesCabecera .= ' <a href="' . e(url('caja/cerrar')) . '" class="btn btn-atilio-amarillo">'
+        . '<i class="bi bi-lock"></i> Cerrar caja</a>';
+
+    // El administrador define la clave con la que el vendedor abre y
+    // cierra. Solo a el le corresponde cambiarla.
     if ($esAdmin) {
-        $accionesCabecera .= ' <a href="' . e(url('caja/cerrar')) . '" class="btn btn-atilio-amarillo">'
-            . '<i class="bi bi-lock"></i> Cerrar caja</a>';
+        $claveLista = Caja::clave_configurada();
+        $accionesCabecera .= ' <a href="' . e(url('caja/clave')) . '" class="btn btn-atilio-oscuro">'
+            . '<i class="bi bi-key-fill"></i> '
+            . ($claveLista ? 'Cambiar la clave de caja' : 'Poner la clave de caja')
+            . '</a>';
     }
 } elseif ($esAdmin) {
     $accionesCabecera = '<a href="' . e(url('caja/abrir')) . '" class="btn btn-atilio-oscuro">'
@@ -278,7 +289,12 @@ require APP_ROOT . '/includes/header.php';
 <?php endif; ?>
 
 <!-- ============ HISTORIAL DE CAJAS ============ -->
-<?php if ($esAdmin && !empty($historial)): ?>
+<?php
+    // El historial lo ven los dos. Si el vendedor puede cerrar el
+    // turno, tiene que poder ver que lo cerro y con cuantoDiferencia:
+    // cerrar y no poder comprobar el cierre deja el registro a
+    // medias.
+    if (!empty($historial)): ?>
     <div class="tarjeta mt-3">
         <div class="tarjeta-cabecera">
             <span><i class="bi bi-clock-history"></i> Turnos anteriores</span>
@@ -291,6 +307,7 @@ require APP_ROOT . '/includes/header.php';
                         <th>Apertura</th>
                         <th>Cierre</th>
                         <th>Abrió</th>
+                        <th>Cerró</th>
                         <th class="text-end">Ventas</th>
                         <th class="text-end">Total</th>
                         <th class="text-end">Esperado</th>
@@ -310,6 +327,11 @@ require APP_ROOT . '/includes/header.php';
                             </td>
                             <td style="color: var(--texto-suave); font-size: 0.9rem;">
                                 <?= e((string) $turno['abierta_por']) ?>
+                            </td>
+                            <td style="color: var(--texto-suave); font-size: 0.9rem;">
+                                <?= $turno['cerrado_en'] !== null
+                                    ? e((string) $turno['cerrada_por'])
+                                    : '&mdash;' ?>
                             </td>
                             <td class="text-end"><?= (int) $turno['ventas'] ?></td>
                             <td class="text-end"><?= e(money($turno['total_vendido'])) ?></td>

@@ -517,13 +517,18 @@ function rutas_app(): array
             'ocultar'     => 'es_admin',
         ],
 
+        // Cerrar el turno lo puede hacer cualquiera del turno, no
+        // solo el administrador: en un bar cambia el turno y a veces
+        // no esta el dueño. El que cierra queda registrado con su
+        // nombre en la caja y en la auditoria, asi que no queda en
+        // el aire.
         'caja/cerrar' => [
             'controlador' => 'caja/cerrar.php',
-            'permiso'     => 'administrador',
+            'permiso'     => 'vendedor',
             'titulo'      => 'Cerrar caja',
             'icono'       => '',
             'grupo'       => 'gestion',
-            'ocultar'     => 'es_admin',
+            'ocultar'     => null,
         ],
 
         // Entradas y salidas de plata que no son ventas: las puede
@@ -535,6 +540,21 @@ function rutas_app(): array
             'icono'       => '',
             'grupo'       => 'gestion',
             'ocultar'     => null,
+        ],
+
+        // ---------- Clave de caja (solo administrador) ----------
+        // El administrador define la clave que el vendedor tiene que
+        // escribir para abrir y cerrar el turno. Va fuera del menu: es
+        // un ajuste, no algo a lo que se entre cada dia. Se llega desde
+        // la pantalla de caja.
+        'caja/clave' => [
+            'controlador' => 'caja/clave.php',
+            'permiso'     => 'administrador',
+            'titulo'      => 'Clave de caja',
+            'icono'       => '',
+            'grupo'       => 'gestion',
+            'ocultar'     => null,
+            'menu'        => false,
         ],
 
         // ---------- Historial de ventas (solo admin) ----------

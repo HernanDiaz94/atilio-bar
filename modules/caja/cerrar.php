@@ -9,7 +9,9 @@
  * no da, el desglose dice si el problema son las ventas, los gastos
  * o un error de tipeo.
  *
- * Solo el administrador.
+ * Lo puede cerrar cualquiera del turno. El que cierra queda con su
+ * nombre en la caja (usuario_cierre_id) y en la auditoria, asi que el
+ * cambio de turno no deja nada en el aire.
  * -----------------------------------------------------------------
 */
 
@@ -22,6 +24,33 @@ if ($caja === null) {
 
 $cajaId  = (int) $caja['id'];
 $esperado = Caja::esperado($cajaId);
+
+// ------------------------------------------------------------
+// La clave de caja
+//
+// Mismo reparto que al abrir: el administrador pasa sin escribir, el
+// vendedor tiene que ponerla. Va antes de contar la plata, que es lo
+// que hay que proteger.
+// ------------------------------------------------------------
+if (es_post() && !Auth::es_admin()) {
+    if (!Caja::clave_configurada()) {
+        flash_error('Todavia no hay clave de caja. Pedile al administrador que la ponga en Caja, arriba a la derecha.');
+        redirigir('caja');
+    }
+
+    if (!Caja::clave_verificar(post_crudo('clave_caja'))) {
+        $estado = Caja::clave_estado();
+
+        if ($estado['frenado']) {
+            flash_error('Clave incorrecta. Espera ' . $estado['minutos'] . ' minutos antes de volver a intentar.');
+        } else {
+            $quedan = max(0, Caja::CLAVE_INTENTOS - $estado['intentos']);
+            flash_error('La clave de caja no es correcta. Te ' . ($quedan === 1 ? 'queda 1 intento' : 'quedan ' . $quedan . ' intentos') . '.');
+        }
+
+        redirigir('caja/cerrar');
+    }
+}
 
 // ------------------------------------------------------------
 // POST: cerrar de verdad

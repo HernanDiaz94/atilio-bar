@@ -77,6 +77,33 @@ require APP_ROOT . '/includes/header.php';
                 </div>
             </form>
         <?php else: ?>
+            <?php
+            // El vendedor necesita la clave de caja para abrir el
+            // turno. Al administrador no se le pide: es suya.
+            $pedirClave = !Auth::es_admin() && Caja::clave_configurada();
+
+            // Sin clave puesta, el vendedor no puede abrir igual. En vez
+            // de mostrarle un formulario que no va a poder completar
+            // (y que le va a pedir que llene antes de decirle que no),
+            // se le explica una sola vez que tiene que pedirsela al
+            // administrador.
+            $sinClave = !Auth::es_admin() && !Caja::clave_configurada();
+            ?>
+
+            <?php if ($sinClave): ?>
+                <div class="tarjeta">
+                    <div class="tarjeta-cabecera">
+                        <span style="color: #8A1B1B;"><i class="bi bi-exclamation-triangle-fill"></i> Falta la clave de caja</span>
+                    </div>
+                    <div class="tarjeta-cuerpo centrado">
+                        <p class="mb-1 fw-bold">Todavia no hay clave de caja</p>
+                        <p class="mb-0" style="color: var(--texto-suave);">
+                            Para abrir el turno hace falta la clave que define el
+                            administrador. Pedisela y volve a entrar.
+                        </p>
+                    </div>
+                </div>
+            <?php else: ?>
             <!-- ============ ABRIR CAJA ============ -->
             <form method="post" action="<?= e(url('caja/abrir')) ?>"
                   class="tarjeta" data-validar novalidate>
@@ -107,7 +134,7 @@ require APP_ROOT . '/includes/header.php';
                             <input type="text" id="apertura_importe" name="apertura_importe"
                                    class="form-control" inputmode="decimal"
                                    value="<?= e((string) ($entradas['apertura_importe'] ?? '0')) ?>"
-                                   required autofocus data-etiqueta="plata del cajón">
+                                   required <?= $pedirClave ? '' : 'autofocus' ?> data-etiqueta="plata del cajón">
                         </div>
                         <span class="form-text">Billetes y monedas, todo junto.</span>
                         <?php if (isset($errores['apertura_importe'])): ?>
@@ -132,11 +159,31 @@ require APP_ROOT . '/includes/header.php';
                                placeholder="Opcional">
                     </div>
 
+                    <?php if ($pedirClave): ?>
+                        <div class="marco-amarillo p-3 mb-3">
+                            <strong>Falta la clave de caja.</strong>
+                            <p class="mb-0 mt-1">
+                                Pedisela al administrador para abrir el turno.
+                            </p>
+                        </div>
+
+                        <div class="campo mb-3">
+                            <label for="clave_caja" class="form-label">
+                                Clave de caja <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="clave_caja" name="clave_caja"
+                                   class="form-control" required minlength="4"
+                                   maxlength="40" autocomplete="off" autofocus
+                                   data-etiqueta="clave de caja">
+                        </div>
+                    <?php endif; ?>
+
                     <button type="submit" class="btn btn-atilio-oscuro btn-grande w-100">
                         <i class="bi bi-unlock-fill"></i> Abrir la caja
                     </button>
                 </div>
             </form>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>

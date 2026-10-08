@@ -52,13 +52,15 @@ $accion = post('accion', 'abrir');
 // abrir la caja tambien, que es lo contrario de lo que dice el
 // comentario de arriba.
 // ------------------------------------------------------------
-if (es_post() && $accion === 'abrir' && !Auth::es_admin()) {
-    flash_error('Abrir la caja lo hace el administrador.');
-    redirigir('caja');
-}
-
-// ------------------------------------------------------------
 // Registrar una entrada o salida
+//
+// OJO: la guarda de "solo el administrador abre la caja" que estaba
+// aca se SACO. Dejaba al vendedor afuera antes de que llegara a la
+// comprobacion de la clave, asi que el mensaje que veia era "Abrir la
+// caja lo hace el administrador" y nunca le de chance de escribir la
+// clave que el mismo administrador le habia dado.
+//
+// La regla ahora es una sola, y esta mas abajo: la clave.
 // ------------------------------------------------------------
 if ($accion === 'movimiento') {
     $caja = Caja::abierta();
@@ -97,6 +99,36 @@ if ($accion === 'movimiento') {
     );
 
     redirigir('caja');
+}
+
+// ------------------------------------------------------------
+// La clave de caja
+//
+// El administrador no la pone: es suya. El vendedor si, y sin clave
+// correcta no abre el turno.
+//
+// Va ANTES de mirar los campos del formulario a proposito: si se
+// validara despues, un POST armado a mano sin el campo de la clave
+// pasaria el control entero.
+// ------------------------------------------------------------
+if (es_post() && $accion === 'abrir' && !Auth::es_admin()) {
+    if (!Caja::clave_configurada()) {
+        flash_error('Todavia no hay clave de caja. Pedile al administrador que la ponga en Caja, arriba a la derecha.');
+        redirigir('caja');
+    }
+
+    if (!Caja::clave_verificar(post_crudo('clave_caja'))) {
+        $estado = Caja::clave_estado();
+
+        if ($estado['frenado']) {
+            flash_error('Clave incorrecta. Espera ' . $estado['minutos'] . ' minutos antes de volver a intentar.');
+        } else {
+            $quedan = max(0, Caja::CLAVE_INTENTOS - $estado['intentos']);
+            flash_error('La clave de caja no es correcta. Te ' . ($quedan === 1 ? 'queda 1 intento' : 'quedan ' . $quedan . ' intentos') . '.');
+        }
+
+        redirigir('caja');
+    }
 }
 
 // ------------------------------------------------------------
@@ -147,13 +179,20 @@ if (es_post() && $accion === 'abrir') {
 
 // ------------------------------------------------------------
 // GET: la pantalla
+//
+// OJO: aca ya NO hay guarda de rol. Antes el vendedor que no
+// encontraba ninguna caja abierta se lo mandaba de vuelta a la caja,
+// porque abrir el turno era solo del administrador.
+//
+// Eso quedo viejo cuando se le permitio abrir al vendedor con la
+// clave: si se dejaba la guarda, el vendedor era expulsado de la
+// pantalla justo cuando era el momento de abrir el turno, que es
+// cuando mas la necesita.
+//
+// Ahora lo que decide es la clave, y eso se resuelve mas arriba, en
+// el POST.
 // ------------------------------------------------------------
 $caja = Caja::abierta();
-
-if ($caja === null && !Auth::es_admin()) {
-    flash_error('No hay ninguna caja abierta.');
-    redirigir('caja');
-}
 
 if ($caja !== null) {
     // Si la caja ya está abierta, esta pantalla solo sirve para
