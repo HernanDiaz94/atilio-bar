@@ -2,27 +2,80 @@
 #  .htaccess  ·  Bar "Atilio"  ·  raíz de la aplicación
 # ------------------------------------------------------------------
 #  Este archivo no hace el ruteo de la aplicación: eso lo hace
-#  index.php con el parámetro ?r=. Acá solo va seguridad.
+#  index.php con el parámetro ?r=. Acá van seguridad y el paso a
+#  https.
 #
 #  Si el hosting no soporta .htaccess, la aplicación IGUAL
-#  funciona: lo único que se pierde es el bloqueo de carpetas.
-#  Por eso el instalador y los datos sensibles están además
-#  protegidos desde PHP.
+#  funciona: lo único que se pierde es el bloqueo de carpetas y el
+#  paso automático a https. Por eso el instalador y los datos
+#  sensibles están además protegidos desde PHP.
 # ==================================================================
 
 # ------------------------------------------------------------------
-# 1) No listar el contenido de las carpetas
+# 1) PASO A HTTPS
+#
+#  Por qué: el sitio contestaba por http y por https igual, sin que
+#  nada mandara de uno al otro. Si alguien escribía el dominio sin
+#  las https, el navegador se quedaba en http y lo marcaba como "no
+#  seguro" aunque el certificado estuviera bien.
+#
+#  Por qué está todo dentro de <IfModule mod_rewrite.c>: si el
+#  hosting no tiene ese módulo, lo que pasa es que NO se hace el
+#  redirect. El sitio sigue andando por http. La alternativa
+#  (dejar la instrucción suelta) es un error 500 en cada página: el
+#  bar queda sin sistema.
+#
+#  Por qué mira X-Forwarded-Proto: en hosting compartido hay un
+#  proxy adelante del servidor, y desde adentro %HTTPS puede decir
+#  "off" aunque el visitante haya llegado por https. Sin esta
+#  condición, cada visita por https rebotaría a https, en un bucle
+#  que deja el sitio inutilizable.
+# ------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Código 301: el navegador guarda que esa dirección ya es https.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# ------------------------------------------------------------------
+# 1b) HSTS  --  DESACTIVADO A PROPOSITO
+#
+#  Con esto el navegador deja de intentar http aunque el visitante
+#  lo escriba mal, y muestra el candado siempre.
+#
+#  Está desactivado a propósito porque es una promesa por 6 meses:
+#  si el hosting se queda sin https en algún momento de ese
+#  tiempo, el navegador va a rechazar el sitio y NO va a dejar
+#  pasar la excepción. Quedarían seis meses sin poder entrar ni
+#  para arreglarlo.
+#
+#  En un hosting gratuito el certificado lo renueva el proveedor y
+#  a veces se cae. Por eso queda apagado.
+#
+#  Cuando quieras activarlo: sacá el "#" de las tres líneas de
+#  abajo. Cambiá 15552000 por un número más chico (86400 es un día)
+#  mientras te sentís más tranquilo con el ssl.
+# ------------------------------------------------------------------
+# <IfModule mod_headers.c>
+#     Header always set Strict-Transport-Security "max-age=15552000"
+# </IfModule>
+
+# ------------------------------------------------------------------
+# 2) No listar el contenido de las carpetas
 #    Si alguien entra a /modules/ no ve la lista de archivos.
 # ------------------------------------------------------------------
 Options -Indexes
 
 # ------------------------------------------------------------------
-# 2) Página de inicio por defecto
+# 3) Página de inicio por defecto
 # ------------------------------------------------------------------
 DirectoryIndex index.php
 
 # ------------------------------------------------------------------
-# 3) Proteger archivos que no deben descargarse nunca
+# 4) Proteger archivos que no deben descargarse nunca
 #    .htaccess, .sql, .log, .md, .json, .ini, .yml, .xml
 # ------------------------------------------------------------------
 <FilesMatch "^(\.htaccess|\.htpasswd|.*\.(sql|log|md|json|ini|yml|yaml|xml|bak|old|orig|swp|dist|bak~))$">
@@ -36,14 +89,14 @@ DirectoryIndex index.php
 </FilesMatch>
 
 # ------------------------------------------------------------------
-# 4) Sin listados de archivos en subcarpetas
+# 5) Sin listados de archivos en subcarpetas
 # ------------------------------------------------------------------
 <IfModule mod_autoindex.c>
     Options -Indexes
 </IfModule>
 
 # ------------------------------------------------------------------
-# 5) Ocultar la versión de PHP en los errores
+# 6) Ocultar la versión de PHP en los errores
 # ------------------------------------------------------------------
 <IfModule mod_php.c>
     php_flag expose_php off
