@@ -35,7 +35,22 @@ logs/*.log
 #  Si alguna vez versionaste tu config.php con la contraseña real,
 #  sacalo del historial con git-filter-repo (o BFG). Avisame y te
 #  explico cómo, pero mejor no hacerlo nunca desde el principio.
-config/config.php
+#
+#  La regla es "cualquier .php de config/, menos la plantilla". Se
+#  puso así porque apareció un configDev.php con datos de la demo y
+#  NO estaba cubierto por la línea de arriba: un segundo archivo de
+#  configuración es justo lo que un día se commitea con la
+#  contraseña de producción por inercia, sin que nadie lo note.
+#  Con esta regla no puede pasar: todo .php de config/ queda fuera
+#  salvo que uno vuelva a agregar la excepción a mano.
+config/*
+!config/config.example.php
+
+#  Los paquetes de subida (htdocs.zip y similares) se arman copiando
+#  la carpeta entera, así que se llevan config/config.php con la
+#  contraseña adentro. No tienen nada que hacer en el repo: son
+#  artefactos de una subida, no código.
+*.zip
 
 
 # ------------------------------------------------------------

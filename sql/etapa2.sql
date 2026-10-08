@@ -8,7 +8,7 @@
 --
 --  Es un archivo SEPARADO a propósito: se aplica sobre una base que
 --  ya tiene datos de la Etapa 1 sin tocar las tablas existentes.
---  Todas lasSentencias usan CREATE TABLE IF NOT EXISTS, así que
+--  Todas las sentencias usan CREATE TABLE IF NOT EXISTS, así que
 --  correrlo dos veces no rompe nada.
 -- ==================================================================
 

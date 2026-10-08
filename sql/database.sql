@@ -169,7 +169,17 @@ VALUES
     ('stock_alerta_bajo', '1', 'booleano', 'Mostrar alertas de stock bajo en el dashboard.', 'general', 1, NOW()),
 
     ('caja_apertura_inicial', '0', 'booleano', 'Pedir monto inicial al abrir la caja del día.', 'caja', 1, NOW()),
-    ('caja_permitir_diff', '1', 'booleano', 'Permitir cerrar la caja con diferencia.', 'caja', 1, NOW());
+    ('caja_permitir_diff', '1', 'booleano', 'Permitir cerrar la caja con diferencia.', 'caja', 1, NOW())
+
+-- Guarda de idempotencia: si la clave ya existe NO se toca el valor.
+-- Sin esto, importar este archivo por segunda vez cortaba con
+-- "Duplicate entry 'seguridad_max_intentos'". Los otros cinco
+-- archivos de migracion ya traian esta misma guarda.
+--
+-- Importante: no se pone `valor` = `valor` porque eso pisaria lo
+-- que el dueño haya cambiado en Configuracion. Lo que tiene que
+-- pasar es que la clave este y su valor siga como esta.
+ON DUPLICATE KEY UPDATE `clave` = `clave`;
 
 
 -- ==================================================================

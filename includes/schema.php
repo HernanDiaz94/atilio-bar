@@ -189,12 +189,19 @@ final class Schema
                 . '</li>' . "\n";
         }
 
+        // El nombre sale de APP_NOMBRE. El defined() es por si esta
+        // pantalla se llegara a mostrar sin config cargado: antes se
+        // escribia "Atilio" a mano y era el único lugar del sistema
+        // que no decia "Atilio Bar".
+        $nombre = defined('APP_NOMBRE') ? (string) APP_NOMBRE : 'Atilio Bar';
+
         echo '<!DOCTYPE html>
 <html lang="es-AR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Falta importar una migracion &middot; Atilio</title>
+<title>Falta importar una migracion &middot; '
+            . htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') . '</title>
 <style>
     body { font-family: system-ui, sans-serif; background: #FFF9E6; color: #2F4F2F;
            margin: 0; padding: 2rem 1rem; }

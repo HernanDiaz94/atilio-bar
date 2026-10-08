@@ -34,7 +34,13 @@ if (!is_file($rutaConfig)) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Falta la configuración &middot; Atilio</title>
+        <?php /* El nombre va escrito a mano y no sale de APP_NOMBRE a
+                 propósito: esta pantalla aparece JUSTO cuando
+                 config/config.php no existe, o sea cuando la
+                 constante todavía no se pudo definir. Si se usara
+                 acá, la propia pantalla que avisa del problema
+                 rompería al tratar de mostrarlo. */ ?>
+        <title>Falta la configuración &middot; Atilio Bar</title>
         <style>
             body { font-family: system-ui, sans-serif; background: #FFFADC; color: #2F4F2F;
                    margin: 0; padding: 2rem 1rem; display: flex; justify-content: center; }
