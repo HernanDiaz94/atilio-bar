@@ -92,10 +92,20 @@ function error_consejo_conexion(PDOException $e): string
     return match ($codigo) {
         '1045' => 'El usuario o la contraseña de MySQL están mal. Revisá DB_USER y DB_PASS en config/config.php.',
         '1049' => 'La base de datos "' . DB_NAME . '" no existe. Creala desde el panel de ByetHost.',
-        '2002' => 'No se puede llegar al servidor de base de datos. Revisá DB_HOST (tiene que ser sqlXXX.byethost.com, no localhost).',
-        '2005' => 'No se puede llegar al servidor de base de datos. Revisá DB_HOST (tiene que ser sqlXXX.byethost.com, no localhost).',
+        // 2002 y 2005 casi siempre son la misma causa: el servidor de
+        // la base está mal escrito. Es el error más común al subir a
+        // ByetHost, y el más barato de arreglar una vez que se sabe.
+        '2002' => 'No se puede llegar al servidor de la base. Revisá DB_HOST en config/config.php: '
+            . 'tiene que ser el servidor que te dio ByetHost (por ejemplo sqlXXX.byethost18.com), NO localhost. '
+            . 'Lo encontrás en el panel, en Base de datos → MySQL, en la columna "Servidor".',
+        '2005' => 'No se puede llegar al servidor de la base. Revisá DB_HOST en config/config.php: '
+            . 'tiene que ser el servidor que te dio ByetHost (por ejemplo sqlXXX.byethost18.com), NO localhost. '
+            . 'Lo encontrás en el panel, en Base de datos → MySQL, en la columna "Servidor".',
         '1044' => 'El usuario de MySQL no tiene permiso sobre esa base. Revisá DB_USER.',
-        default => 'No se pudo conectar con la base de datos. Revisá los 4 datos de MySQL en config/config.php.',
+        default => 'No se pudo conectar con la base de datos. Revisá los cuatro datos de MySQL '
+            . 'en config/config.php: DB_HOST, DB_NAME, DB_USER y DB_PASS. Ojo con el prefijo: '
+            . 'el nombre de la base y el del usuario lo arma ByetHost y no es "atilio", es el que '
+            . 'figura en el panel.',
     };
 }
 
