@@ -20,6 +20,12 @@ if ($comandaId <= 0) {
     // no obligar a volver a la grilla.
     $pendientes = Venta::pendientesDeCobro();
 
+    // Esta vista usa $esAdmin para decidir si esconde el boton de
+    // la caja. Antes no se armaba en este camino: se definiaba mas
+    // abajo, despues del return, asi que la vista recibia la
+    // variable sin definir y PHP lareated vacía en silencio.
+    $esAdmin = Auth::es_admin();
+
     $titulo    = 'Cobrar';
     $subtitulo = 'Mesas que pidieron la cuenta';
     $accionesCabecera = '<a href="' . e(url('mesas')) . '" class="btn btn-atilio-amarillo">'
@@ -125,11 +131,18 @@ if (empty($metodos)) {
 
 // --- Lo que el vendedor ya había cargado -----------------------
 // Los pagos se recargan de la entrada guardada para que, si se
-//EQUIVOCA al confirmar, no tenga que escribirlos de nuevo.
+// equivoca al confirmar, no tenga que escribirlos de nuevo.
+//
+// OJO: lo que se recarga es $entradas['pagos'], NO $entrados.
+// La variable $entrados no existe en este archivo: se usaba una
+// que nunca se definió, y PHP la creaba vacía sin avisar, así
+// que los pagos del intento anterior NUNCA se recargaban. Lo que
+// se veia era el boton de cobrar con los campos en blanco, sin
+// error en pantalla y con un aviso en el log del servidor.
 $pagosPrevios = [];
 
 if (!empty($entradas['pagos']) && is_array($entradas['pagos'])) {
-    $pagosPrevios = $entrados;
+    $pagosPrevios = $entradas['pagos'];
 }
 
 $esAdmin = Auth::es_admin();

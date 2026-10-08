@@ -209,8 +209,17 @@ final class Horarios
         $guardado = [];
 
         foreach (self::DIAS as $numero => $nombre) {
-            $abreCrudo   = trim((string) ($datos['abre_' . $numero] ?? ''));
-            $cierraCrudo = trim((string) ($datos['cierra_' . $numero] ?? ''));
+            // El (string) de antes no quiere decir "si viene algo,
+            // convertilo": si el campo llega como arreglo (por ejemplo
+            // "abre_1[]" en la URL), convertirlo produce el aviso
+            // "Array to string conversion" y el horario queda como la
+            // palabra "Array", que despues se rechaza como hora
+            // invalida. Aca se toma solo si es texto.
+            $valorAbre   = $datos['abre_' . $numero] ?? '';
+            $valorCierra = $datos['cierra_' . $numero] ?? '';
+
+            $abreCrudo   = is_string($valorAbre) ? trim($valorAbre) : '';
+            $cierraCrudo = is_string($valorCierra) ? trim($valorCierra) : '';
 
             $abre   = $abreCrudo === '' ? null : self::validarHora($abreCrudo);
             $cierra = $cierraCrudo === '' ? null : self::validarHora($cierraCrudo);

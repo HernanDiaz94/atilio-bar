@@ -26,11 +26,6 @@ $titulo    = 'Reportes';
 $subtitulo = $etiqueta . ' · ' . (int) $rango['dias']
     . ' ' . ((int) $rango['dias'] === 1 ? 'día' : 'días');
 
-// El boton de descargar va arriba, a la derecha del titulo, para
-// que se llegue con el pulgar y no haya que bajar hasta el final.
-$accionesCabecera = '<a href="' . e($linkCsv) . '" class="btn btn-atilio-amarillo">'
-    . '<i class="bi bi-download"></i> Descargar CSV</a>';
-
 // El link al CSV se arma primero porque va en la cabecera.
 $csvParams = ['vista' => $vista];
 
@@ -42,6 +37,17 @@ if ($rango['periodo'] !== '') {
 }
 
 $linkCsv = url('reportes/csv?' . http_build_query($csvParams));
+
+// El boton de descargar va arriba, a la derecha del titulo, para
+// que se llegue con el pulgar y no haya que bajar hasta el final.
+//
+// Va DESPUES de armar $linkCsv, no antes: antes se usaba la
+// variable sin que existiera todavia, y PHP no se queja. Solo
+// escribia un aviso en el log y dejaba el boton con href="" (o sea,
+// el boton no llevaba a ningun lado y habia que adivinar que la
+// descarga era en otra pestana).
+$accionesCabecera = '<a href="' . e($linkCsv) . '" class="btn btn-atilio-amarillo">'
+    . '<i class="bi bi-download"></i> Descargar CSV</a>';
 
 /** Link al mismo reporte, cambiando período o vista. */
 $link = static function (array $params) use ($vista, $rango): string {

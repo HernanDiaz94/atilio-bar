@@ -43,12 +43,32 @@ function e_json(mixed $valor): string
  *
  *   url('usuarios')                -> /atilio/index.php?r=usuarios
  *   url('compras/ver&id=3')       -> /atilio/index.php?r=compras%2Fver&id=3
+ *   url('reportes/csv?vista=dia') -> /atilio/index.php?r=reportes%2Fcsv&vista=dia
  *
  * Ojo con el segundo caso: lo que va después del & son parámetros
  * de la URL, NO parte del nombre de la ruta. Si se codificara
  * todo junto, el servidor buscaría una ruta llamada
  * "compras/ver&id=3" y daría 404. Por eso se separa antes de
  * codificar.
+ *
+ * EL SEPARADOR SIEMPRE ES &
+ *
+ * Antes se aceptaba '?' y se devolvía tal cual, pero la base ya
+ * trae "index.php?r=", así que un '?' ahí produce una URL con
+ * dos interrogaciones:
+ *
+ *   /index.php?r=reportes%2Fcsv?vista=dia
+ *                   ^^^^^^^^^^^^ no dice "vista": dice otra cosa
+ *
+ * El servidor toma todo lo que va después del primer '?' como la
+ * query string, así que la ruta llega como "reportes/csv?vista=dia"
+ * y no existe: 404. Pasaba con el botón de descargar el CSV de
+ * Reportes, que armaba la ruta con http_build_query y por lo tanto
+ * con '?'.
+ *
+ * Por eso ahora se acepta cualquiera de los dos al recibir (para no
+ * romper a quien lo escriba asi) pero siempre se devuelve con '&',
+ * que es lo unico que funciona.
  *
  * @param string $ruta  Ruta del módulo, con parámetros opcionales
  *                      separados por & o por ?
@@ -59,14 +79,22 @@ function url(string $ruta = ''): string
 
     $ruta = ltrim($ruta, '/');
 
-    // Separar los parámetros de la ruta.
-    $separador = str_contains($ruta, '?') ? '?' : '&';
-    $partes    = explode($separador, $ruta, 2);
+    // Separar los parámetros de la ruta. Se aceptan los dos
+    // separadores al entrar...
+    $corte    = strcspn($ruta, '?&');
+    $nombreRuta = substr($ruta, 0, $corte);
+    $parametros = substr($ruta, $corte);
 
-    $nombreRuta = $partes[0];
-    $parametros = isset($partes[1]) ? $separador . $partes[1] : '';
+    // ...pero se devuelve siempre con &: la URL ya tiene un '?'.
+    $parametros = ltrim($parametros, '?&');
 
-    return $base . '/index.php?r=' . rawurlencode($nombreRuta) . $parametros;
+    $url = $base . '/index.php?r=' . rawurlencode($nombreRuta);
+
+    if ($parametros !== '') {
+        $url .= '&' . $parametros;
+    }
+
+    return $url;
 }
 
 /** URL directa a un archivo físico (login.php, install.php...). */
