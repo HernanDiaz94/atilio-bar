@@ -51,14 +51,20 @@ require APP_ROOT . '/includes/header.php';
 </div>
 
 <!-- ================= FILTRO DE ZONA ================= -->
+<!-- El filtro se arma con los grupos reales, no con Mesas::ZONAS.
+     Si queda alguna mesa en una zona que el sistema no conoce (por
+     ejemplo una base donde todavia no se corrio la etapa 7), esa zona
+     aparece en el filtro: es la unica forma de llegar a esas mesas con
+     el dedo, porque la grilla las muestra en su propio grupo. -->
 <div class="filtro-zonas">
     <a href="<?= e(url('mesas')) ?>" class="<?= $zona === '' ? 'zona-activa' : '' ?>">
         Todas
     </a>
-    <?php foreach (Mesas::ZONAS as $clave => $etiqueta): ?>
+    <?php foreach ($grupos as $clave => $grupo): ?>
+        <?php if (empty($grupo['mesas'])) { continue; } ?>
         <a href="<?= e(url('mesas') . '&zona=' . $clave) ?>"
            class="<?= $zona === $clave ? 'zona-activa' : '' ?>">
-            <?= e($etiqueta) ?>
+            <?= e($grupo['etiqueta']) ?>
         </a>
     <?php endforeach; ?>
 </div>
@@ -80,8 +86,19 @@ require APP_ROOT . '/includes/header.php';
         </div>
     </div>
 <?php else: ?>
-    <?php foreach ($grupos as $claveZona => $grupo): ?>
+    <?php /* $grupos trae TODAS las zonas (por eso se calcula antes
+         del filtro en modules/mesas/index.php): con un filtro puesto
+         el listado de arriba tiene que seguir ofreciendo las demas.
+         El continue de mas abajo es lo que hace que, aun asi, la
+         grilla dibuje solo el grupo elegido. */
+    foreach ($grupos as $claveZona => $grupo): ?>
         <?php if (empty($grupo['mesas'])) { continue; } ?>
+
+        <?php /* Con un filtro puesto se dibuja solo ese grupo. Los
+                 otros vienen en $grupos para el filtro de arriba (por
+                 eso se calculan antes de filtrar), pero no en la
+                 grilla: si no, el filtro no serviria de nada. */ ?>
+        <?php if ($zona !== '' && $zona !== $claveZona) { continue; } ?>
 
         <section class="grupo-mesas">
             <h2 class="grupo-titulo">
@@ -89,7 +106,11 @@ require APP_ROOT . '/includes/header.php';
                 <span class="grupo-cantidad"><?= e((string) count($grupo['mesas'])) ?></span>
             </h2>
 
-            <div class="grilla-mesas">
+            <!-- Las mesas de $grupo['mesas'] son TODAS las de esa zona:
+         agrupar_por_zona() no deja ninguna afuera, ni siquiera de una
+         zona que el sistema no conozca. Ver el comentario de esa
+         funcion antes de "optimizar" este bucle. -->
+    <div class="grilla-mesas">
                 <?php foreach ($grupo['mesas'] as $mesa): ?>
                     <?php
                     $estado    = (string) $mesa['estado'];

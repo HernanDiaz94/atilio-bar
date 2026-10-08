@@ -167,7 +167,25 @@ public const ZONAS = [
     }
 
     /**
-     * Agrupa la grilla por zona, en el orden del Enum.
+     * Agrupa la grilla por zona, en el orden de ZONAS.
+     *
+     * NINGÚNA MESA SE PIERDE
+     *
+     * Antes, lo que no estaba en ZONAS directamente no se dibujaba:
+     * el bucle recorría la lista de zonas y las mesas con otra zona
+     * no caían en ningún grupo. Con las diez mesas cargadas, quitar
+     * una zona del código (por ejemplo la vereda) hacía desaparecer tres
+     * mesas de la grilla, sin avisar. Peor: el resumen de arriba
+     * decía "10 libres" y la grilla mostraba siete, porque el
+     * resumen cuenta sobre la lista completa y el dibujo sobre los
+     * grupos. El mozo perdía mesas sin enterarse de por qué.
+     *
+     * Ahora, una mesa con una zona que ZONAS no conoce cae en un
+     * grupo propio, al final, con la zona escrita tal cual viene de
+     * la base. Así siempre se ve todo lo que hay, y si queda alguna
+     * mesa en una zona vieja el mismo sistema lo muestra en vez de
+     * esconderlo. Correr sql/etapa7.sql sigue siendo lo correcto:
+     * esto es la red de seguridad, no el plan.
      */
     public static function agrupar_por_zona(array $mesas): array
     {
@@ -175,12 +193,28 @@ public const ZONAS = [
 
         foreach (self::ZONAS as $clave => $etiqueta) {
             $grupos[$clave] = ['etiqueta' => $etiqueta, 'mesas' => []];
+        }
 
-            foreach ($mesas as $mesa) {
-                if ($mesa['zona'] === $clave) {
-                    $grupos[$clave]['mesas'][] = $mesa;
-                }
+        // Zonas que vienen de la base pero no están en ZONAS.
+        $desconocidas = [];
+
+        foreach ($mesas as $mesa) {
+            $zona = (string) $mesa['zona'];
+
+            if (array_key_exists($zona, $grupos)) {
+                $grupos[$zona]['mesas'][] = $mesa;
+            } else {
+                $desconocidas[$zona][] = $mesa;
             }
+        }
+
+        foreach ($desconocidas as $zona => $delGrupo) {
+            $grupos[$zona] = [
+                // Se muestra como viene, en minúsculas para que se
+                // note que es una zona que el sistema no reconoce.
+                'etiqueta' => ucfirst($zona),
+                'mesas'   => $delGrupo,
+            ];
         }
 
         return $grupos;
