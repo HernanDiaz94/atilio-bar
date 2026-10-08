@@ -24,8 +24,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ==================================================================
 --  1) MESAS
 --
---  La zona sirve para agrupar la grilla: el salón, la vereda y la
---  barra se manejan distinto y conviene verlos por separado.
+--  La zona sirve para agrupar la grilla: las mesas y la barra se
+--  manejan distinto y conviene verlos por separado. Son dos y solo
+--  dos; las de la vereda no existen en este bar y se sacaron.
 -- ==================================================================
 CREATE TABLE IF NOT EXISTS `mesas` (
     `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -33,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `mesas` (
     `nombre`     VARCHAR(60)  NOT NULL DEFAULT ''
                 COMMENT 'Nombre interno opcional: "Esquina del salon"',
     `capacidad`  INT UNSIGNED NOT NULL DEFAULT 4,
-    `zona`       ENUM('salon','vereda','barra') NOT NULL DEFAULT 'salon',
+    `zona`       ENUM('salon','barra') NOT NULL DEFAULT 'salon',
     `orden`      INT          NOT NULL DEFAULT 0
                 COMMENT 'Para acomodar la grilla a gusto, sin renumerar',
     `activo`     TINYINT(1)   NOT NULL DEFAULT 1,
@@ -261,7 +262,7 @@ CREATE TABLE IF NOT EXISTS `reservas` (
 -- ==================================================================
 --  5) LAS DIEZ MESAS
 --
---  Diez mesas: cinco del salón, tres de la vereda y dos de la
+--  Ocho mesas de adentro y dos de la barra.
 --  barra. Es un punto de partida, no un tope.
 --
 --  Para cambiar la cantidad NO hay que tocar este archivo. Desde
@@ -300,18 +301,22 @@ INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`,
 SELECT '5', 'Del fondo', 8, 'salon', 5, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '5');
 
--- --- Vereda: tres mesas afuera ----------------------------------
+-- --- Mesas 6, 7 y 8 ----------------------------------------------
+--  Antes eran tres mesas de la vereda (V1, V2, V3), un dato de
+--  ejemplo que se invento y que no existe en el bar. Pasan a ser
+--  mesas de adentro. Si el bar ya tiene cargadas las suyas, el
+--  WHERE NOT EXISTS no las pisa.
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT 'V1', 'Vereda izquierda', 2, 'vereda', 1, 1, NOW()
-WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'V1');
+SELECT '6', '', 4, 'salon', 6, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '6');
 
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT 'V2', '', 2, 'vereda', 2, 1, NOW()
-WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'V2');
+SELECT '7', '', 4, 'salon', 7, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '7');
 
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
-SELECT 'V3', '', 2, 'vereda', 3, 1, NOW()
-WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'V3');
+SELECT '8', '', 6, 'salon', 8, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = '8');
 
 -- --- Barra: dos lugares ----------------------------------------
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
@@ -329,9 +334,13 @@ WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'B2');
 INSERT INTO `configuracion`
     (`clave`, `valor`, `tipo`, `descripcion`, `grupo`, `editable`, `creado_en`)
 VALUES
-    ('mesa_zona_salon',  'Salon',  'texto', 'Nombre de la zona del salon.',  'general', 1, NOW()),
-    ('mesa_zona_vereda', 'Vereda', 'texto', 'Nombre de la zona de la vereda.', 'general', 1, NOW()),
-    ('mesa_zona_barra',  'Barra',  'texto', 'Nombre de la zona de la barra.',  'general', 1, NOW()),
+    -- OJO: acá NO van mesa_zona_salon, mesa_zona_vereda ni
+    -- mesa_zona_barra. Decian "Nombre de la zona del salon" y
+    -- ningun archivo las leia: el texto sale de Mesas::ZONAS, en el
+    -- codigo, porque es una etiqueta de la grilla y no algo que el
+    -- bar pueda cambiar por su cuenta. Editarlas desde la base no
+    -- hacia nada, y era la forma de perder una tarde buscando
+    -- por que cambiar el nombre no cambiaba la pantalla.
     ('comanda_minutos_vigencia', '240', 'numero',
      'Minutos que una mesa queda ocupada si se abre y no se toca.', 'general', 1, NOW()),
     ('mesas_capacidad_default', '4', 'numero',

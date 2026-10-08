@@ -60,8 +60,8 @@
             <input type="text" id="prefijo" name="prefijo" class="form-control"
                    value="<?= e((string) ($entradas['prefijo'] ?? '')) ?>"
                    maxlength="5" data-etiqueta="prefijo"
-                   placeholder="Vacío = 11, 12, 13. Con prefijo V = V11, V12">
-            <span class="form-text">Para las de la vereda, por ejemplo.</span>
+                   placeholder="Vacío = 11, 12, 13. Con prefijo B = B11, B12">
+            <span class="form-text">Para las de la barra, por ejemplo.</span>
             <?php if (isset($errores['prefijo'])): ?>
                 <span class="error-campo"><?= e((string) $errores['prefijo']) ?></span>
             <?php endif; ?>

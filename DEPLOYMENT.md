@@ -284,9 +284,13 @@ importar, y armá la carta a mano.
 
 ### Qué trae la Etapa 3
 
-Al importarla aparecen las **diez mesas** del bar: 5 del salón, 3 de
-la vereda y 2 de la barra. Y aparece la pantalla **Mesas**, que ya es
-la principal del sistema.
+Al importarla aparecen las **diez mesas** del bar: 8 de adentro y 2 de
+la barra. Y aparece la pantalla **Mesas**, que ya es la principal del
+sistema.
+
+La grilla tiene dos zonas y solo dos: **Mesas** y **Barras**. Antes
+había una tercera, la vereda, que era un dato de ejemplo inventado y
+que no existe en el bar.
 
 El número de mesas NO es fijo: se cambia desde **Administrar mesas**,
 de a una o en tanda con "Generar mesas en tanda" (ponés de la 11 a la

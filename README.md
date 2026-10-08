@@ -43,10 +43,17 @@ sobre la base que ya tiene datos, sin tocar las tablas anteriores.
 | 4      | `sql/etapa4.sql`    | Cobro, ventas y caja               |
 | 5      | `sql/etapa5.sql`    | Reportes y CSV                     |
 | 6      | `sql/etapa6.sql`    | Horarios y página pública          |
+| 7      | `sql/etapa7.sql`    | Saca la zona "vereda" (bases viejas)|
 
 Cada migración es segura de correr más de una vez: los `CREATE TABLE`
 usan `IF NOT EXISTS` y los datos iniciales se insertan solo si no
 existen.
+
+La etapa 7 es distinta: no agrega nada, *saca* la zona vereda que
+venía de ejemplo. Solo hace falta en bases que ya tenían las mesas
+V1, V2 y V3. Si instalás de cero con `ATILIO-INSTALAR.sql`, no la
+necesitás: ese archivo ya trae la etapa 3 nueva, con ocho mesas y sin
+vereda.
 
 ---
 
@@ -117,7 +124,7 @@ Cuatro números que el dueño miraba de memoria y ahora están en pantalla.
 |---|---|
 | **Por día** | Cuánto se facturó cada día, y cuánto se ganó |
 | **Qué se vende** | Los productos ordenados por cantidad, para saber qué comprar |
-| **Mesas y zonas** | Cuánto factura cada mesa, y salón contra vereda contra barra |
+| **Mesas y zonas** | Cuánto factura cada mesa, y mesas contra barras |
 | **Medios de pago** | Cuánto entró en efectivo y cuánto con tarjeta |
 
 El período se elige con botones (hoy, ayer, esta semana, este mes,
@@ -343,7 +350,8 @@ AtilioBar/
 │   ├── etapa3.sql            Migración de la Etapa 3
 │   ├── etapa4.sql            Migración de la Etapa 4
 │   ├── etapa5.sql            Migración de la Etapa 5
-│   └── etapa6.sql            Migración de la Etapa 6
+│   ├── etapa6.sql            Migración de la Etapa 6
+│   └── etapa7.sql            Saca la zona vereda (solo bases viejas)
 └── logs/                     Errores de PHP (no se versiona)
 ```
 
@@ -440,10 +448,15 @@ grande, con el número enorme y el estado escrito al lado del color:
 libre, ocupada, por cobrar o reservada. Nunca hay que adivinar por
 el color.
 
-Vienen diez mesas de ejemplo (cinco del salón, tres de la vereda y
-dos de la barra), pero el número se cambia desde **Administrar
-mesas**: de a una, o en tanda con "Generar mesas en tanda" poniendo
-el rango (de la 11 a la 20). Las mesas que ya existen no se pisan.
+Vienen diez mesas de ejemplo (ocho de adentro y dos de la barra), pero
+el número se cambia desde **Administrar mesas**: de a una, o en tanda
+con "Generar mesas en tanda" poniendo el rango (de la 11 a la 20). Las
+mesas que ya existen no se pisan.
+
+La grilla tiene dos zonas y solo dos: **Mesas** y **Barras**. Los
+nombres salen de `Mesas::ZONAS`, en el código, y no de la base: por
+eso no hay claves de configuración para cambiarlos, porque cambiarlas
+desde phpMyAdmin no hacía nada.
 
 El generador pide el rango y no la cantidad a propósito: las mesas
 de un bar tienen números que el mozo reconoce de memoria. Si el

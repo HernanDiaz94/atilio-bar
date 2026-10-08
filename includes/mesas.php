@@ -28,12 +28,30 @@
  */
 final class Mesas
 {
-    /** Zonas del bar, con su etiqueta. */
-    public const ZONAS = [
-        'salon'  => 'Salón',
-        'vereda' => 'Vereda',
-        'barra'  => 'Barra',
-    ];
+    /**
+ * Zonas del bar, con su etiqueta.
+ *
+ * SON DOS, Y SON LAS QUE TIENE EL BAR. Antes habia una tercera, la
+ * vereda, que era un dato de ejemplo que se invento para las mesas
+ * de afuera. El dueño la sacio: no hay mesas en la vereda. Solo
+ * mesas y barra.
+ *
+ * OJO: el texto sale de aca y no de la configuracion. Habia tres
+ * claves (mesa_zona_salon, mesa_zona_vereda, mesa_zona_barra) con la
+ * descripcion "Nombre de la zona", pero NINGUN archivo las leia:
+ * cambiarlas desde la base noacia nada. Esas claves se sacaron. Si
+ * alguna vez se quiere cambiar estos nombres, se cambia aca y no en
+ * otra parte.
+ *
+ * La clave interna sigue siendo 'salon' aunque la etiqueta diga
+ * "Mesas": renombrar la clave obligaria a tocar los datos de las
+ * mesas que ya estan cargadas, y para cambiar un texto no hace
+ * falta.
+ */
+public const ZONAS = [
+    'salon' => 'Mesas',
+    'barra' => 'Barras',
+];
 
     /**
      * Devuelve todas las mesas con su estado actual, agrupables
