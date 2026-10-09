@@ -563,6 +563,44 @@ INSERT INTO `categorias` (`nombre`, `descripcion`, `orden`, `activo`, `creado_en
 SELECT 'Insumos', 'Licores y zumos para las preparaciones. No se venden solos', 4, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `categorias` WHERE `nombre` = 'Insumos');
 
+-- La categoría de las mesas de pool. La ficha ES un producto, y está
+-- acá y no en la etapa 8 (que es la migración) para que una
+-- instalación de cero lo traiga desde el arranque.
+INSERT INTO `categorias` (`nombre`, `descripcion`, `orden`, `activo`, `creado_en`)
+SELECT 'Juegos', 'Mesas de pool y demás.', 5, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `categorias` WHERE `nombre` = 'Juegos');
+
+
+-- --- LA FICHA DEL POOL ------------------------------------------------
+--
+-- Esto es lo que se cobra cuando alguien juega: $2.500 por ficha.
+--
+-- controla_stock = 0 a propósito: la ficha no se descuenta de ningún
+-- lado. No hay un frasco que se gaste ni una cantidad que se lleve
+-- cuenta, y descontarla de un stock que no existe daría negativo.
+--
+-- unidad = 'ficha' para que el pedido muestre "1 x ficha" y el mozo
+-- entienda que lo que se cobra es eso, y no una consumición.
+--
+-- El precio se edita desde la pantalla de Producto. Y como el precio
+-- queda copiado en cada línea del pedido cuando se carga, subirlo no
+-- altera los pedidos viejos.
+INSERT INTO `productos`
+    (`codigo`, `categoria_id`, `nombre`, `descripcion`,
+     `precio_venta`, `unidad`, `controla_stock`, `es_combo`,
+     `activo`, `creado_en`)
+SELECT 'POOL',
+       (SELECT `id` FROM `categorias` WHERE `nombre` = 'Juegos'),
+       'Mesa de Pool',
+       'La ficha de la mesa de pool.',
+       2500.00,
+       'ficha',
+       0,
+       0,
+       1,
+       NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Mesa de Pool');
+
 
 -- --- BEBIDAS ---------------------------------------------------------
 -- Son las tres que se venden por vaso. Todas llevan control de stock:
@@ -679,9 +717,9 @@ SET NAMES utf8mb4;
 -- ==================================================================
 --  1) MESAS
 --
---  La zona sirve para agrupar la grilla: las mesas y la barra se
---  manejan distinto y conviene verlos por separado. Son dos y solo
---  dos; las de la vereda no existen en este bar y se sacaron.
+--  La zona sirve para agrupar la grilla: las mesas de adentro, las de
+--  la barra y las de pool se manejan distinto y conviene verlos por
+--  separado. La de la vereda no existe en este bar y se saco.
 -- ==================================================================
 CREATE TABLE IF NOT EXISTS `mesas` (
     `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -689,7 +727,7 @@ CREATE TABLE IF NOT EXISTS `mesas` (
     `nombre`     VARCHAR(60)  NOT NULL DEFAULT ''
                 COMMENT 'Nombre interno opcional: "Esquina del salon"',
     `capacidad`  INT UNSIGNED NOT NULL DEFAULT 4,
-    `zona`       ENUM('salon','barra') NOT NULL DEFAULT 'salon',
+    `zona`       ENUM('salon','barra','pool') NOT NULL DEFAULT 'salon',
     `orden`      INT          NOT NULL DEFAULT 0
                 COMMENT 'Para acomodar la grilla a gusto, sin renumerar',
     `activo`     TINYINT(1)   NOT NULL DEFAULT 1,
@@ -981,6 +1019,18 @@ WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'B1');
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
 SELECT 'B2', '', 2, 'barra', 2, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'B2');
+
+-- --- Pool: dos mesas, que se cobran por ficha ---------------------
+--  La ficha es un producto de la carta ("Mesa de Pool"), no algo de
+--  la mesa: asi el dueño le cambia el precio desde la pantalla de
+--  Producto sin tocar nada aca.
+INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
+SELECT 'P1', 'Mesa de pool 1', 4, 'pool', 1, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'P1');
+
+INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
+SELECT 'P2', 'Mesa de pool 2', 4, 'pool', 2, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'P2');
 
 
 -- ==================================================================

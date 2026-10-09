@@ -44,16 +44,18 @@ sobre la base que ya tiene datos, sin tocar las tablas anteriores.
 | 5      | `sql/etapa5.sql`    | Reportes y CSV                     |
 | 6      | `sql/etapa6.sql`    | Horarios y página pública          |
 | 7      | `sql/etapa7.sql`    | Saca la zona "vereda" (bases viejas)|
+| 8      | `sql/etapa8.sql`    | Las mesas de pool (bases viejas)    |
 
 Cada migración es segura de correr más de una vez: los `CREATE TABLE`
 usan `IF NOT EXISTS` y los datos iniciales se insertan solo si no
 existen.
 
-La etapa 7 es distinta: no agrega nada, *saca* la zona vereda que
-venía de ejemplo. Solo hace falta en bases que ya tenían las mesas
-V1, V2 y V3. Si instalás de cero con `ATILIO-INSTALAR.sql`, no la
-necesitás: ese archivo ya trae la etapa 3 nueva, con ocho mesas y sin
-vereda.
+Las etapas 7 y 8 son distintas: no agregan nada, *sacan* la zona
+vereda que venía de ejemplo y la cambian por la de pool. Solo hacen
+falta en bases que ya tenían las mesas V1, V2 y V3. Si instalás de
+cero con `ATILIO-INSTALAR.sql`, no las necesitás: ese archivo ya trae
+la etapa 3 nueva, con ocho mesas de adentro, P1 y P2, y la etapa 2
+con la ficha del pool ya cargada.
 
 ---
 
@@ -124,7 +126,7 @@ Cuatro números que el dueño miraba de memoria y ahora están en pantalla.
 |---|---|
 | **Por día** | Cuánto se facturó cada día, y cuánto se ganó |
 | **Qué se vende** | Los productos ordenados por cantidad, para saber qué comprar |
-| **Mesas y zonas** | Cuánto factura cada mesa, y mesas contra barras |
+| **Mesas y zonas** | Cuánto factura cada mesa, y mesas, barras y pool |
 | **Medios de pago** | Cuánto entró en efectivo y cuánto con tarjeta |
 
 El período se elige con botones (hoy, ayer, esta semana, este mes,
@@ -453,10 +455,31 @@ el número se cambia desde **Administrar mesas**: de a una, o en tanda
 con "Generar mesas en tanda" poniendo el rango (de la 11 a la 20). Las
 mesas que ya existen no se pisan.
 
-La grilla tiene dos zonas y solo dos: **Mesas** y **Barras**. Los
-nombres salen de `Mesas::ZONAS`, en el código, y no de la base: por
-eso no hay claves de configuración para cambiarlos, porque cambiarlas
-desde phpMyAdmin no hacía nada.
+La grilla tiene tres zonas: **Mesas** (las ocho de adentro),
+**Barras** (las dos de la barra) y **Pool** (P1 y P2). Los nombres
+salen de `Mesas::ZONAS`, en el código, y no de la base: por eso no hay
+claves de configuración para cambiarlos, porque cambiarlas desde
+phpMyAdmin no hacía nada.
+
+### Las mesas de pool
+
+P1 y P2 se cobran **por ficha**: cada vez que alguien juega, se
+carga una ficha y se cobra con el pedido, como cualquier otra cosa de
+la carta. La ficha es el producto "Mesa de Pool", en su propia
+categoría "Juegos".
+
+Está cargado a $2.500 y **se edita desde la pantalla de Producto**,
+igual que cualquier otro precio. Como el precio queda copiado en cada
+línea del pedido cuando se carga, cambiarlo no altera los pedidos
+viejos.
+
+La ficha **no descuenta stock** a propósito: no hay un frasco que se
+gaste ni una cantidad que se lleve cuenta, y descontarla de un stock
+que no existe daría negativo.
+
+El flujo es el de siempre: abrir la mesa, cargar las fichas que se
+jugaron (más lo que se haya pedido de beber, si alguien pidió algo),
+"Pedir la cuenta" y cobrar.
 
 El generador pide el rango y no la cantidad a propósito: las mesas
 de un bar tienen números que el mozo reconoce de memoria. Si el

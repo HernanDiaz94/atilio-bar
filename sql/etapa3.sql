@@ -24,9 +24,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ==================================================================
 --  1) MESAS
 --
---  La zona sirve para agrupar la grilla: las mesas y la barra se
---  manejan distinto y conviene verlos por separado. Son dos y solo
---  dos; las de la vereda no existen en este bar y se sacaron.
+--  La zona sirve para agrupar la grilla: las mesas de adentro, las de
+--  la barra y las de pool se manejan distinto y conviene verlos por
+--  separado. La de la vereda no existe en este bar y se saco.
 -- ==================================================================
 CREATE TABLE IF NOT EXISTS `mesas` (
     `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `mesas` (
     `nombre`     VARCHAR(60)  NOT NULL DEFAULT ''
                 COMMENT 'Nombre interno opcional: "Esquina del salon"',
     `capacidad`  INT UNSIGNED NOT NULL DEFAULT 4,
-    `zona`       ENUM('salon','barra') NOT NULL DEFAULT 'salon',
+    `zona`       ENUM('salon','barra','pool') NOT NULL DEFAULT 'salon',
     `orden`      INT          NOT NULL DEFAULT 0
                 COMMENT 'Para acomodar la grilla a gusto, sin renumerar',
     `activo`     TINYINT(1)   NOT NULL DEFAULT 1,
@@ -326,6 +326,18 @@ WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'B1');
 INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
 SELECT 'B2', '', 2, 'barra', 2, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'B2');
+
+-- --- Pool: dos mesas, que se cobran por ficha ---------------------
+--  La ficha es un producto de la carta ("Mesa de Pool"), no algo de
+--  la mesa: asi el dueño le cambia el precio desde la pantalla de
+--  Producto sin tocar nada aca.
+INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
+SELECT 'P1', 'Mesa de pool 1', 4, 'pool', 1, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'P1');
+
+INSERT INTO `mesas` (`numero`, `nombre`, `capacidad`, `zona`, `orden`, `activo`, `creado_en`)
+SELECT 'P2', 'Mesa de pool 2', 4, 'pool', 2, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `mesas` WHERE `numero` = 'P2');
 
 
 -- ==================================================================

@@ -284,13 +284,18 @@ importar, y armá la carta a mano.
 
 ### Qué trae la Etapa 3
 
-Al importarla aparecen las **diez mesas** del bar: 8 de adentro y 2 de
-la barra. Y aparece la pantalla **Mesas**, que ya es la principal del
-sistema.
+Al importarla aparecen las **doce mesas** del bar: 8 de adentro, 2 de
+la barra y las 2 de pool. Y aparece la pantalla **Mesas**, que ya es
+la principal del sistema.
 
-La grilla tiene dos zonas y solo dos: **Mesas** y **Barras**. Antes
-había una tercera, la vereda, que era un dato de ejemplo inventado y
+La grilla tiene tres zonas: **Mesas**, **Barras** y **Pool**. Antes
+había una cuarta, la vereda, que era un dato de ejemplo inventado y
 que no existe en el bar.
+
+Las mesas de pool (P1 y P2) se cobran por ficha. La ficha viene
+cargada en la carta como el producto "Mesa de Pool", a $2.500, en su
+propia categoría "Juegos". Se edita desde la pantalla de Producto si
+algún día cambia el precio.
 
 El número de mesas NO es fijo: se cambia desde **Administrar mesas**,
 de a una o en tanda con "Generar mesas en tanda" (ponés de la 11 a la

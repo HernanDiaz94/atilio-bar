@@ -292,6 +292,44 @@ INSERT INTO `categorias` (`nombre`, `descripcion`, `orden`, `activo`, `creado_en
 SELECT 'Insumos', 'Licores y zumos para las preparaciones. No se venden solos', 4, 1, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM `categorias` WHERE `nombre` = 'Insumos');
 
+-- La categoría de las mesas de pool. La ficha ES un producto, y está
+-- acá y no en la etapa 8 (que es la migración) para que una
+-- instalación de cero lo traiga desde el arranque.
+INSERT INTO `categorias` (`nombre`, `descripcion`, `orden`, `activo`, `creado_en`)
+SELECT 'Juegos', 'Mesas de pool y demás.', 5, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `categorias` WHERE `nombre` = 'Juegos');
+
+
+-- --- LA FICHA DEL POOL ------------------------------------------------
+--
+-- Esto es lo que se cobra cuando alguien juega: $2.500 por ficha.
+--
+-- controla_stock = 0 a propósito: la ficha no se descuenta de ningún
+-- lado. No hay un frasco que se gaste ni una cantidad que se lleve
+-- cuenta, y descontarla de un stock que no existe daría negativo.
+--
+-- unidad = 'ficha' para que el pedido muestre "1 x ficha" y el mozo
+-- entienda que lo que se cobra es eso, y no una consumición.
+--
+-- El precio se edita desde la pantalla de Producto. Y como el precio
+-- queda copiado en cada línea del pedido cuando se carga, subirlo no
+-- altera los pedidos viejos.
+INSERT INTO `productos`
+    (`codigo`, `categoria_id`, `nombre`, `descripcion`,
+     `precio_venta`, `unidad`, `controla_stock`, `es_combo`,
+     `activo`, `creado_en`)
+SELECT 'POOL',
+       (SELECT `id` FROM `categorias` WHERE `nombre` = 'Juegos'),
+       'Mesa de Pool',
+       'La ficha de la mesa de pool.',
+       2500.00,
+       'ficha',
+       0,
+       0,
+       1,
+       NOW()
+WHERE NOT EXISTS (SELECT 1 FROM `productos` WHERE `nombre` = 'Mesa de Pool');
+
 
 -- --- BEBIDAS ---------------------------------------------------------
 -- Son las tres que se venden por vaso. Todas llevan control de stock:

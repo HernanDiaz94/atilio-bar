@@ -31,10 +31,15 @@ final class Mesas
     /**
  * Zonas del bar, con su etiqueta.
  *
- * SON DOS, Y SON LAS QUE TIENE EL BAR. Antes habia una tercera, la
- * vereda, que era un dato de ejemplo que se invento para las mesas
- * de afuera. El dueño la sacio: no hay mesas en la vereda. Solo
- * mesas y barra.
+ * SON TRES, Y SON LAS QUE TIENE EL BAR:
+ *
+ *   salon -> Mesas    las ocho de adentro
+ *   barra -> Barras   las dos de la barra
+ *   pool  -> Pool     las dos mesas de pool, que se cobran por ficha
+ *
+ * La vereda estuvo antes y se saco: era un dato de ejemplo inventado,
+ * no un lugar del bar. La zona "pool" se sumo cuando el dueno decidio
+ * que tiene dos mesas de pool con ficha de $2.500.
  *
  * OJO: el texto sale de aca y no de la configuracion. Habia tres
  * claves (mesa_zona_salon, mesa_zona_vereda, mesa_zona_barra) con la
@@ -51,6 +56,7 @@ final class Mesas
 public const ZONAS = [
     'salon' => 'Mesas',
     'barra' => 'Barras',
+    'pool'  => 'Pool',
 ];
 
     /**
