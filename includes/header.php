@@ -59,6 +59,22 @@ $rutas      = $rutas      ?? function_exists('rutas_app') ? rutas_app() : [];
             <span class="navbar-toggler-icon"></span>
         </button>
 
+        <?php /* El boton del usuario va FUERA de este bloque colapsable, y despues
+             del </div> que lo cierra.
+
+             POR QUE: abajo de 992px, este bloque se oculta con el hamburger.
+             Con el boton del usuario ADENTRO, el unico modo de llegar a
+             "Salir" era abrir el menu y recorrer la lista entera de modulos
+             hasta el final. Medido en un Poco X6 Pro (407x904 CSS), la barra
+             abierta ocupaba 676px de 844: el 80% de la pantalla. Y con la
+             barra cerrada el boton directamente no existe en pantalla
+             (offsetParent null, alto cero).
+
+             Ademas el desplegable queda a merced de Popper, que calcula la
+             posicion en JavaScript y puede pisar el "bottom: 100%" del CSS.
+             Afuera del collapse, el boton esta siempre en pantalla y el
+             desplegable se abre hacia abajo, con espacio de sobra. */
+        ?>
         <div class="collapse navbar-collapse" id="menuPrincipal">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
@@ -103,8 +119,9 @@ $rutas      = $rutas      ?? function_exists('rutas_app') ? rutas_app() : [];
                     </li>
                 <?php endforeach; ?>
             </ul>
+        </div><!-- /#menuPrincipal -->
 
-            <?php if (Auth::logueado()): ?>
+        <?php if (Auth::logueado()): ?>
                 <!-- La clase "dropdown" es de Bootstrap y NO es decorativa: es la que
                      convierte este div en el punto de anclaje del desplegable.
                      Sin ella, el menu se posiciona contra otro elemento y el
@@ -146,7 +163,6 @@ $rutas      = $rutas      ?? function_exists('rutas_app') ? rutas_app() : [];
                     </ul>
                 </div>
             <?php endif; ?>
-        </div>
     </div>
 </nav>
 

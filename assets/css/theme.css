@@ -150,6 +150,37 @@ textarea:focus-visible {
     min-height: 42px;
 }
 
+/* En pantalla chica, el botón del usuario y las dos opciones de su
+   desplegable ("Mi cuenta" y "Salir") suben a 44px de alto.
+
+   44px es el mínimo que comfortably se toca con el pulgar: por debajo,
+   el botón se mide en 32px y hay que apuntarlo. Es lo que mide el dedo
+   cuando tapa la punta del dedo, y es el tamaño que usan los botones
+   de las apps nativas.
+
+   El ancho tambien sube, para que "Salir" no quede en una franja
+   angosta que parece un separador. */
+@media (max-width: 991.98px) {
+    /* OJO con la especificidad: el boton tiene la clase "btn-sm", que
+       pone min-height 38px mas abajo en este mismo archivo. Con un solo
+       selector de clase gana el que esta mas abajo, y el boton se
+       quedaba en 38px. Con dos clases (".usuario-menu .usuario-boton")
+       gana esta regla, que va antes. */
+    .usuario-menu .usuario-boton,
+    .usuario-menu .dropdown-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+    }
+
+    .usuario-menu .dropdown-item small {
+        margin-left: 0;
+    }
+}
+
 .usuario-boton:hover {
     background-color: var(--amarillo-claro);
     color: var(--texto);
@@ -161,28 +192,74 @@ textarea:focus-visible {
 }
 
 /* ------------------------------------------------------------
-   En pantalla chica el desplegable del usuario se abre hacia ARRIBA.
+   En pantalla chica el boton del usuario queda ARRIBA, siempre visible
+   ------------------------------------------------------------
+   Abajo de 992px el boton se saca del menu colapsable y queda a la
+   derecha de la barra. Antes estaba dentro del menu hamburguesa, y eso
+   hacia dos cosas malas:
 
-   Por que: abajo de 992px la barra se convierte en el menu desplegable
-   y el boton del usuario queda al FINAL de una lista larga, pegado al
-   borde inferior. Abriendo hacia abajo el menu caia entero fuera de la
-   pantalla: medido en un viewport de 658px de alto, el desplegable iba
-   de 676 a 868 y no habia ni un pixel visible. O sea, "Mi cuenta" y
-   "Salir" quedaban inalcanzables justo en el celular, que es donde se
-   usan.
+     - Con el menu cerrado el boton no existia en pantalla. Medido en un
+       Poco X6 Pro (407x904 CSS), con el menu cerrado el boton daba
+       offsetParent null y alto cero: no habia nada que tocar. Habia que
+       abrir el menu para poder siquiera llegar a "Salir".
 
-   En pantalla grande no se toca nada: ahi el boton esta en la barra, con
-   espacio de sobra debajo, y el menu se abre hacia abajo como siempre.
+     - Con el menu abierto, la barra crecia hasta ocupar el 80% de la
+       pantalla (676px de 844). El boton quedaba al final de la lista de
+       13 modulos. Para llegar a "Salir": abrir, recorrer, tocar el
+       boton, tocar Salir. Cuatro pasos.
 
-   El `position: relative` lo aporta la clase `dropdown` de Bootstrap
-   que esta en el HTML del boton. Sin ella, este "bottom: 100%" no se
-   mide contra el boton y el menu sale por donde no es.
+   Ademas el desplegable quedaba a merced de Popper, que calcula la
+   posicion en JavaScript y puede pisar las reglas de CSS. Por eso el
+   menu se pone en position:static: asi se posiciona como bloque normal
+   y manda el CSS, no Popper.
+
+   Con el boton arriba, el desplegable se abre hacia ABAJO, que es lo
+   natural: esta en la barra y tiene todo el espacio libre debajo.
+
+   En pantalla grande (>=992px) no se toca nada: el boton ya estaba en la
+   barra con espacio de sobra, y el menu se abre hacia abajo como
+   siempre.
    ------------------------------------------------------------ */
 @media (max-width: 991.98px) {
+    /* El orden de los tres elementos de la barra.
+
+       El HTML los pone asi: logo, hamburguesa, menu colapsable, boton
+       del usuario. Con el menu abierto, el colapsable se lleva el ancho
+       completo (flex-basis 100%), el boton del usuario se caia a una
+       fila siguiente, y ahi abajo el desplegable de "Salir" quedaba
+       fuera de la pantalla: medido en 360x640, "Salir" caia a 822px de
+       una pantalla de 640.
+
+       Con estos orders, la primera fila de la barra queda: logo, boton
+       del usuario, hamburguesa. Y el menu colapsable, que toma el ancho
+       completo, se va solo a la segunda fila.
+
+       El logo se queda en 1 (es el orden por defecto del HTML). */
+    .usuario-menu {
+        order: 2;
+        margin-left: auto;
+        padding-left: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .navbar-toggler {
+        order: 3;
+        margin-left: 0.25rem;
+    }
+
+    #menuPrincipal {
+        order: 4;
+        flex-basis: 100%;
+    }
+
     .usuario-menu .dropdown-menu {
+        /* Sin absolute: Popper deja de decidir la posicion. */
+        position: static;
         top: auto;
-        bottom: 100%;
-        margin-bottom: 0.35rem;
+        bottom: auto;
+        margin: 0.35rem 0 0 0;
+        /* Que no se vaya de la pantalla a la derecha */
+        max-width: calc(100vw - 1.5rem);
     }
 }
 
