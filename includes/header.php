@@ -37,7 +37,16 @@ $rutas      = $rutas      ?? function_exists('rutas_app') ? rutas_app() : [];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Tema propio: paleta amarilla y verde en assets/css/theme.css -->
-    <link href="<?= e(url_archivo('assets/css/theme.css')) ?>" rel="stylesheet">
+
+    <!-- El ?v= lleva la fecha del archivo. Sin esto, el navegador y el
+         hosting guardan el CSS viejo y siguen mostrando la pantalla
+         anterior aunque el archivo ya este subido: fue lo que paso con
+         el boton del usuario, que el dueno subio dos veces sin ver
+         ningun cambio. Con la fecha, cada version del CSS es distinta
+         para el navegador y se descarga siempre la que esta subida. -->
+    <?php $cssTema = APP_ROOT . '/assets/css/theme.css'; ?>
+    <link href="<?= e(url_archivo('assets/css/theme.css') . '?v=' . (is_file($cssTema) ? (string) filemtime($cssTema) : '1')) ?>"
+          rel="stylesheet">
 </head>
 <body>
 
@@ -128,7 +137,21 @@ $rutas      = $rutas      ?? function_exists('rutas_app') ? rutas_app() : [];
                      "bottom: 100%" del CSS de abajo no mide desde el lugar
                      correcto, con lo cual el desplegable queda fuera de la
                      pantalla. -->
-                <div class="usuario-menu dropdown">
+                <!-- data-bs-display="static" le dice a Bootstrap que NO use
+                     Popper para posicionar este desplegable.
+
+                     Por que importa: con Popper, el menu se posiciona en
+                     JavaScript y gana contra el CSS. Abajo de 992px el CSS
+                     lo pone "position: static" (para que caiga en el flujo
+                     normal y se pueda deslizar hasta el), pero Popper le
+                     escribia arriba un estilo inline con "position:
+                     absolute", y el menu volvia a flotar sobre el pie de
+                     pagina, sin espacio para deslizar.
+
+                     Sin esto, en el celular "Salir" queda debajo del todo y
+                     no hay forma de llegar con el dedo.
+                -->
+                <div class="usuario-menu dropdown" data-bs-display="static">
                     <button class="btn btn-atilio btn-sm usuario-boton" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle-fill"></i>

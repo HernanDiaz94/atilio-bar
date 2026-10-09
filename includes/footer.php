@@ -17,7 +17,10 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- JavaScript propio de la aplicación -->
-<script src="<?= e(url_archivo('assets/js/app.js')) ?>"></script>
+<!-- El ?v= lleva la fecha del archivo, por el mismo motivo que en el
+     CSS del header: sin esto el navegador sigue con la version vieja. -->
+<?php $jsApp = APP_ROOT . '/assets/js/app.js'; ?>
+<script src="<?= e(url_archivo('assets/js/app.js') . '?v=' . (is_file($jsApp) ? (string) filemtime($jsApp) : '1')) ?>"></script>
 
 <?php if (!empty($scriptsExtra)): ?>
     <?= $scriptsExtra ?>
