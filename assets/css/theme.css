@@ -1415,6 +1415,120 @@ textarea:focus-visible {
     font-size: 0.82rem;
 }
 
+/* ================================================================
+   LA FICHA DEL POOL
+   ================================================================
+   Boton grande para cargar una ficha de un toque, con el numero de
+   fichas ya cargadas al lado.
+
+   Por que un boton propio y no el producto en la grilla: la ficha es
+   lo unico que se cobra en una mesa de pool. Si el mozo tiene que
+   buscarla entre las bebidas, hay chances de que se olvide. Con un
+   boton de 44px (el minimo que se toca bien con el pulgar) y un toque
+   por ficha, la carga es un gesto, no una busqueda.
+
+   El numero de la derecha no es decorativo: es la unica forma de
+   saber de un vistazo cuantas fichas llevo, sin sumar los renglones
+   del pedido. Si el mozo no lo ve, carga otra y cobra de mas.
+   ================================================================ */
+.bloque-ficha {
+    margin-bottom: 1rem;
+}
+
+.boton-ficha-grande {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    width: 100%;
+    min-height: 88px;
+    padding: 0.9rem 1rem;
+    border: 3px solid var(--verde-oscuro);
+    border-radius: var(--radio-borde);
+    background-color: var(--amarillo);
+    color: var(--texto);
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--verde-oscuro);
+}
+
+.boton-ficha-grande:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 var(--verde-oscuro);
+}
+
+.boton-ficha-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--verde-oscuro);
+    color: var(--texto-sobre-verde);
+    font-size: 1.9rem;
+}
+
+.boton-ficha-texto {
+    flex: 1 1 auto;
+    line-height: 1.2;
+}
+
+.boton-ficha-texto strong {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.boton-ficha-texto small {
+    display: block;
+    font-size: 0.92rem;
+    color: var(--texto-soave);
+}
+
+/* El numero de fichas ya cargadas */
+.boton-ficha-conteo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 74px;
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--radio-chico);
+    background-color: var(--blanco);
+    border: 2px solid var(--verde-oscuro);
+    line-height: 1;
+}
+
+.boton-ficha-conteo strong {
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.boton-ficha-conteo small {
+    font-size: 0.75rem;
+    color: var(--texto-soave);
+}
+
+.boton-ficha-aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0.6rem 0 0;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radio-chico);
+    background-color: var(--verde-claro);
+    border: 2px solid var(--verde-medio);
+    color: var(--texto-sobre-verde);
+    font-size: 0.92rem;
+}
+
+/* El botón chico de la cabecera */
+.boton-ficha {
+    font-weight: 700;
+}
+
 /* Cantidad +/- */
 .producto-boton-cantidad {
     display: flex;

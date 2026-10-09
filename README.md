@@ -477,9 +477,19 @@ La ficha **no descuenta stock** a propósito: no hay un frasco que se
 gaste ni una cantidad que se lleve cuenta, y descontarla de un stock
 que no existe daría negativo.
 
-El flujo es el de siempre: abrir la mesa, cargar las fichas que se
-jugaron (más lo que se haya pedido de beber, si alguien pidió algo),
-"Pedir la cuenta" y cobrar.
+El flujo es el de siempre: abrir la mesa, tocar **Cargar ficha**
+una vez por cada vez que alguien juega (mas lo que se haya pedido de
+beber, si alguien pidio algo), 'Pedir la cuenta' y cobrar.
+
+En una mesa de pool la pantalla tiene un boton grande de **Cargar
+ficha**, con el numero de fichas ya cargadas al lado y el precio de
+cada una. Un toque por ficha, sin buscar el producto en la grilla: la
+ficha es lo unico que se cobra en una mesa de pool, y si el mozo tiene
+que buscarla entre las bebidas hay chances de que se olvide. El boton
+desaparece cuando el pedido esta cerrado, y no aparece en las mesas
+que no son de pool.
+
+Mientras no se cargo ninguna ficha, el boton avisa.
 
 El generador pide el rango y no la cantidad a propósito: las mesas
 de un bar tienen números que el mozo reconoce de memoria. Si el

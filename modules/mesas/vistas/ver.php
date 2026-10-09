@@ -26,12 +26,38 @@ if (!$cerrada) {
     $accionesCabecera .= ' <a href="' . e(url('mesas/mover') . '&comanda_id=' . (int) $comanda['id']) . '" '
         . 'class="btn btn-atilio-amarillo">'
         . '<i class="bi bi-arrow-left-right"></i> Mover</a>';
-} elseif ($estado === 'por_cobrar') {
+}
+
+if ($cerrada && $estado === 'por_cobrar') {
     // Pidio la cuenta: lo natural es cobrar. Va primero porque es
     // lo que hay que hacer ahora.
     $accionesCabecera = '<a href="' . e(url('cobrar') . '&id=' . (int) $comanda['id']) . '" '
         . 'class="btn btn-atilio-oscuro">'
         . '<i class="bi bi-cash-coin"></i> Cobrar</a> ' . $accionesCabecera;
+}
+
+// En una mesa de pool, el boton de la ficha va PRIMERO en la cabecera:
+// es la accion que mas se hace, una por cada vez que alguien juega.
+//
+// Va arriba y no solo en la grilla de productos a proposito: la ficha
+// es lo unico que se cobra en una mesa de pool. Si el mozo tiene que
+// buscarla entre las bebidas para encontrarla, hay chances de que se
+// olvide, y una ficha olvidada es plata que no entra.
+//
+// Es un form y no un link a propósito: el logout tambien es un POST
+// por lo mismo, para que un link externo no pueda cargar fichas sola.
+if (!$cerrada && $esPool && $fichaPoolId > 0) {
+    $accionesCabecera = '<form method="post" action="' . e(url('mesas/agregar-producto')) . '" '
+        . 'class="d-inline">'
+        . csrf_campo()
+        . '<input type="hidden" name="comanda_id" value="' . (int) $comanda['id'] . '">'
+        . '<input type="hidden" name="producto_id" value="' . (int) $fichaPoolId . '">'
+        . '<input type="hidden" name="cantidad" value="1">'
+        . '<button type="submit" class="btn btn-atilio-amarillo boton-ficha" '
+        . 'title="Cargar una ficha de ' . e(money($fichaPoolPrecio)) . '">'
+        . '<i class="bi bi-plus-circle-fill"></i> Ficha'
+        . '</button>'
+        . '</form> ' . $accionesCabecera;
 }
 
 require APP_ROOT . '/includes/header.php';
@@ -196,6 +222,55 @@ require APP_ROOT . '/includes/header.php';
                 Pedir la cuenta
             </button>
         </form>
+    </div>
+<?php endif; ?>
+
+<?php
+/* ================= LA FICHA DEL POOL =================
+ *
+ * En una mesa de pool, el boton "+ Ficha" grande va arriba de todo, con
+ * el numero de fichas ya cargadas. Un toque por ficha jugada.
+ *
+ * Esta ACA y no solo arriba en la cabecera porque el boton de la
+ * cabecera esta en el angulo superior derecho y se mezcla con los
+ * demas botones: para cobrar una ficha, que es lo que el mozo hace
+ * cada vez que alguien termina de jugar, tiene que estar a la vista
+ * con el numero al lado.
+ *
+ * El numero grande no es decorativo: es la unica forma de saber de
+ * un vistazo cuantas fichas llevo. Si el mozo no lo ve, carga otra
+ * y cobra de mas; si no ve nada, carga de menos.
+ */
+if ($esPool && !$cerrada && $fichaPoolId > 0): ?>
+    <div class="bloque-ficha">
+        <form method="post" action="<?= e(url('mesas/agregar-producto')) ?>" class="d-grid">
+            <?= csrf_campo() ?>
+            <input type="hidden" name="comanda_id" value="<?= (int) $comanda['id'] ?>">
+            <input type="hidden" name="producto_id" value="<?= (int) $fichaPoolId ?>">
+            <input type="hidden" name="cantidad" value="1">
+
+            <button type="submit" class="boton-ficha-grande">
+                <span class="boton-ficha-icono">
+                    <i class="bi bi-plus-lg"></i>
+                </span>
+                <span class="boton-ficha-texto">
+                    <strong>Cargar ficha</strong>
+                    <small><?= e(money($fichaPoolPrecio)) ?> cada una</small>
+                </span>
+                <span class="boton-ficha-conteo" aria-label="Fichas cargadas">
+                    <strong><?= (int) $fichasCargadas ?></strong>
+                    <small><?= ((int) $fichasCargadas === 1) ? 'ficha' : 'fichas' ?></small>
+                </span>
+            </button>
+        </form>
+
+        <?php if ((int) $fichasCargadas === 0): ?>
+            <p class="boton-ficha-aviso">
+                <i class="bi bi-info-circle"></i>
+                Todavía no cargaste ninguna ficha. Cada vez que alguien
+                juega, tocá el botón.
+            </p>
+        <?php endif; ?>
     </div>
 <?php endif; ?>
 
